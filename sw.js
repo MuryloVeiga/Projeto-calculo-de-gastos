@@ -1,6 +1,6 @@
 ﻿// Service worker: deixa o app abrir offline.
 // Mostra a versão em cache na hora e atualiza em segundo plano (vale na próxima abertura).
-const CACHE = 'financas-v18';
+const CACHE = 'financas-v19';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (e) => {
