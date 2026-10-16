@@ -1,0 +1,26 @@
+PATO — CAMINHADA SUAVE PARA A DIREITA
+
+Um ciclo de dois passos, com 32 quadros a 30 quadros por segundo.
+Duração do ciclo: 1,0667 segundo. Todos os quadros têm 256 x 256 pixels e fundo transparente.
+As pernas foram articuladas para manter a trajetória contínua dos pés. O corpo mantém escala constante, com pequena oscilação vertical e inclinação.
+
+ARQUIVOS
+previa-caminhada.gif: demonstração sobre fundos claro e escuro, com o personagem pequeno, detalhe ampliado e deslocamento. A volta do deslocamento ao início é só a repetição da demonstração.
+pato-direita-32-quadros.png: prancha de 2048 x 1024 pixels, 8 colunas e 4 linhas. Ler da esquerda para a direita, de cima para baixo.
+quadros/: os 32 PNGs separados, de 00 a 31, já com tamanho e ponto de apoio iguais. Não remover as margens individualmente.
+pato-direita-animado.png: APNG animado com transparência. Alguns visualizadores mostram apenas o primeiro quadro.
+pato-direita-animado.webp: animação WebP com transparência.
+pato-direita.json: posições dos quadros e parâmetros do ciclo.
+
+USO NO APLICATIVO
+Reproduzir 00 a 31 em sequência e repetir, sem repetir o quadro inicial no fim.
+Ponto de referência: x=128, y=221 dentro de cada quadro de 256 x 256 pixels.
+Para um pato com cerca de 90 pixels de largura, exibir cada quadro em uma área de 128 x 128 pixels; o espaço transparente ao redor é intencional.
+Para o pé não deslizar, o deslocamento por ciclo deve ser 56,67 pixels na escala original do quadro. Se o quadro for exibido a 128 x 128, deslocar 28,33 pontos por ciclo, cerca de 26,56 pontos por segundo. Escalar a velocidade proporcionalmente ao tamanho e à velocidade de reprodução.
+O PNG da prancha e os quadros são transparentes. O fundo cinza e os cartões da prévia não fazem parte do pato.
+
+VERIFICAÇÃO
+Prancha, quadros separados e animações exportados. Contornos inspecionados sobre fundos claro e escuro. Passagem do quadro final para o inicial comparada com as demais transições: sem salto maior que o máximo normal do ciclo. Ainda não testado dentro do aplicativo iPhone do usuário.
+
+CRIAÇÃO
+Arte criada com a ferramenta integrada de geração de imagens a partir das referências fornecidas; movimento e montagem dos quadros produzidos por animação articulada.

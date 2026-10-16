@@ -217,6 +217,23 @@ main{max-width:640px;margin:0 auto;
 .xcard .xch{display:flex;justify-content:space-between;padding:8px 0;font-weight:650;font-size:14px}
 .xcard .xrow .em{background:transparent!important}
 
+/* pato que anda pela tela e enche o saco */
+#duck{position:fixed;left:0;bottom:calc(var(--sab) + var(--tabs) + 1px);z-index:14;width:52px;height:49px;will-change:transform;cursor:grab;-webkit-user-select:none;user-select:none;touch-action:none}
+#duck.drag{cursor:grabbing;z-index:16}
+#duck.angry .dfr{filter:saturate(1.5) hue-rotate(-14deg) brightness(.95)}
+#dsprite{width:52px;height:49px;display:block}
+.dbody,.dfr{width:52px;height:49px;display:block}
+/* andar: 32 quadros de 64px em 8x4 (pato-andar.webp), pé no ponto 128,221 do quadro original; de frente: 6 poses x 4 quadros
+   (pato-frente.webp). O quadro é escolhido no duckTick. */
+.dfr{width:64px;height:64px;margin:-6px 0 0 -6px;background:url(pato-andar.webp) 0 0/512px 256px no-repeat}
+#duck.front .dfr{width:52px;height:49px;margin:0;background-image:url(pato-frente.webp);background-size:208px 294px}
+#duck.angry .dbody{animation:dshake .12s linear 6}
+@keyframes dshake{0%,100%{transform:translateX(0)}50%{transform:translateX(1.2px)}}
+.dbub{position:absolute;bottom:50px;left:0;width:max-content;max-width:min(260px,calc(100vw - 32px));background:var(--card);color:var(--text);
+  border:1px solid rgba(201,169,110,.55);border-radius:14px;padding:8px 12px;font-size:13.5px;line-height:1.35;box-shadow:0 6px 18px rgba(0,0,0,.3);
+  opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;pointer-events:none}
+.dbub.show{opacity:1;transform:none}
+
 /* contas do mês */
 .paysum{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:6px}
 .paysum b{color:var(--text);font-variant-numeric:tabular-nums}
@@ -351,6 +368,11 @@ main{max-width:640px;margin:0 auto;
 <button id="fab" aria-label="Novo lançamento">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
 </button>
+
+<div id="duck" hidden aria-label="Pato">
+  <div class="dbub" id="dbub" role="status"></div>
+  <div id="dsprite" aria-hidden="true"><div class="dbody"><div class="dfr"></div></div></div>
+</div>
 
 <nav id="tabs">
   <div class="in-">
@@ -708,6 +730,8 @@ const curMonth = () => today().slice(0, 7);
 const paidDefault = (v, m) => v === true || (v !== false && m < curMonth());
 function paidOf(t, m) {
   if (t.rule) { const r = S.fixed.find((x) => x.id === t.rule); return paidDefault(r && r.pay ? r.pay[m] : undefined, m); }
+  // Gasto avulso no débito (sem cartão, não fixo): já saiu da conta quando a data chega.
+  if (t.paid === undefined && t.type === 'out' && !cardOf(t.card) && t.date <= today()) return true;
   return paidDefault(t.paid, m);
 }
 const billPaid = (cid, m) => paidDefault((S.billPay || {})[billKey(cid, m)], m);
@@ -930,6 +954,13 @@ function vCfg() {
       <button data-act="theme" data-v="dark" class="${S.theme !== 'light' ? 'on' : ''}">🌙 Escuro</button>
       <button data-act="theme" data-v="light" class="${S.theme === 'light' ? 'on' : ''}">☀️ Claro</button>
     </div>
+  </section>
+  <section class="card"><h2>🦆 Pato</h2>
+    <div class="seg">
+      ${[['off', 'Desligado'], ['calm', 'De boa'], ['zoeiro', 'Zoeiro'], ['chato', 'Insuportável']].map(([v, l]) =>
+        `<button data-act="duck" data-v="${v}" class="${(S.duck || 'zoeiro') === v ? 'on' : ''}">${l}</button>`).join('')}
+    </div>
+    <p class="note" style="margin-top:8px">O pato anda pela tela e comenta seus gastos sozinho. Quanto mais chato, mais ele fala.</p>
   </section>
   <section class="card"><h2>Backup</h2>
     <button class="btn" data-act="exp-json">Exportar backup<small>Salva todos os dados num arquivo. Último backup: ${esc(last)}.</small></button>
@@ -1181,6 +1212,7 @@ function render() {
 /* ---------- eventos da tela ---------- */
 document.querySelectorAll('#tabs button').forEach((b) => b.addEventListener('click', () => {
   ui.tab = b.dataset.tab; render(); window.scrollTo(0, 0);
+  duckOnTab();
 }));
 $('#prev').addEventListener('click', () => { ui.month = shiftMonth(ui.month, -1); render(); });
 $('#next').addEventListener('click', () => { ui.month = shiftMonth(ui.month, 1); render(); });
@@ -1199,6 +1231,7 @@ view.addEventListener('click', (e) => {
   if (a === 'edit') { const id = el.dataset.id; openSheet(id.startsWith('r:') ? occById(id) : S.tx.find((t) => t.id === id)); }
   else if (a === 'bill') openBill(el.dataset.id);
   else if (a === 'fuel') openInv('fuel');
+  else if (a === 'duck') { S.duck = el.dataset.v; save(); render(); duckStart(); if (S.duck !== 'off') duckSay(S.duck === 'chato' ? 'Agora sim. Vou te perturbar direitinho.' : 'Quack! Tô de volta.'); }
   else if (a === 'psel') { scrollPrevTo(el.dataset.m, true); selectPrev(el.dataset.m); }
   else if (a === 'update') forceUpdate();
   else if (a === 'theme') { S.theme = el.dataset.v; save(); applyTheme(); render(); }
@@ -1390,9 +1423,12 @@ $('#sheet').addEventListener('submit', (e) => {
     else if (t) Object.assign(t, vals, { date });
   } else if (fix) {
     addRule(vals, date, N);
+    duckOnSave({ ...vals, date, rule: true });
   } else {
     // combustível no débito já entra pago (igual ao "+ Abastecer")
-    S.tx.push({ id: uid(), ...vals, date, ts: Date.now(), ...(vals.cat === FUEL && !vals.card ? { paid: true } : {}) });
+    const novo = { id: uid(), ...vals, date, ts: Date.now(), ...(vals.cat === FUEL && !vals.card ? { paid: true } : {}) };
+    S.tx.push(novo);
+    duckOnSave(novo);
   }
   save();
   ui.month = date.slice(0, 7);
@@ -1679,6 +1715,8 @@ $('#sheet3').addEventListener('submit', (e) => {
     S.tx.push({ id: uid(), type: 'out', amount: amt, cat: FUEL, desc: $('#iDesc').value.trim(), date, ts: Date.now(), card: null, paid: true });
     ui.month = date.slice(0, 7);
     msg = 'Abastecimento salvo';
+    if (duckLevel() !== 'off') setTimeout(() => duckSay(duckFresh([`Mais ${money(amt)} de gasolina. Esse carro bebe mais que você.`,
+      'Abasteceu de novo? Vende esse carro e compra uma bicicleta.', `${money(amt)} no posto. O frentista te agradece.`])), 700);
   } else if (I.mode === 'cdi') {
     S.cdiAuto = $('#iCdiAuto').checked;
     if (S.cdiAuto) {
@@ -1969,6 +2007,411 @@ document.querySelectorAll('.wrap:not(#wrapC) .sheet').forEach((sheet) => {
   });
 });
 
+/* ---------- pato ----------
+   Anda pela barra de baixo e, se estiver ligado, fala sozinho de tempos em tempos, lendo os dados
+   do mês (contas sem pagar, categoria campeã, previsão no vermelho...). Tocar nele faz falar na hora. */
+const duck = { x: 30, y: 0, vx: 0, vy: 0, rot: 0, state: 'walk', throwSpeed: 0, drag: null, dir: 1, speed: 14,
+  pauseUntil: 0, nextTalk: 0, last: [], taps: [], raf: 0, lastT: 0, hideT: 0, angryT: 0 };
+const duckLevel = () => S.duck || 'zoeiro';
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+// Poses de frente (linhas de pato-frente.webp). loop: depois de entrar na pose, fica alternando os 2 últimos quadros.
+const DUCK_POSES = { oculos: { row: 0 }, bracos: { row: 1, loop: true }, aponta: { row: 2 }, cobre: { row: 3 }, aplaude: { row: 4, loop: true }, chama: { row: 5 } };
+const DUCK_POSE = new Map(); // fala -> pose
+const tagPose = (arr, pose) => { for (const x of arr) DUCK_POSE.set(x, pose); return arr; };
+// Bancos de falas do pato fiscal. {v} vira um valor em reais.
+const DUCK_GERAIS = [
+  'Tô de olho em você. 👀', 'Quack. Só passando pra julgar.', 'Já anotou aquele gasto de ontem ou vai fingir que não aconteceu?',
+  'Cafezinho todo dia também é gasto, tá?', 'Se você gastasse menos, sobrava mais pão pra mim.',
+  'Psiu. Vamos conversar.', 'Me explica uma coisa aqui.', 'Isso é saldo ou troco?', 'A sobra tá aqui, tá? Não esquece dela.',
+  'Fiscal de gastos em serviço. Pode continuar, eu só anoto.', 'Eu não julgo. Mentira, eu julgo sim.',
+  'Cada real que sai, uma pena minha cai.', 'Tá tudo anotado aqui na minha caderneta mental.',
+  'Promoção não é desconto se você não ia comprar.', '"Só dessa vez" é a frase mais cara do mundo.',
+  'Frete grátis não existe, ele tá no preço.', 'Parcelar não deixa mais barato. Só deixa mais longe.',
+  'Sabe o que rende mais que poupança? Não gastar.', 'Antes de comprar, espera 24 horas. Se ainda quiser, a gente conversa.',
+  'Carrinho cheio no app não é compra. Ainda dá pra fugir.', 'Assinatura que você não usa é doação. Confere aí.',
+  'O dinheiro não some. Você que gasta e esquece.', 'Quack quack. Tradução: guarda dinheiro.',
+  'Óculos escuros pra não ver o tamanho da fatura.', 'Eu fico aqui embaixo, mas enxergo tudo lá em cima.',
+  'Já pensou num mês sem iFood? Eu também não. Mas pensa.', 'Fim de semana chegando. Esconde o cartão.',
+  'Rico não é quem ganha muito. É quem gasta menos do que ganha.', 'Tem coisa que é necessidade. Tem coisa que é vontade. Sabe a diferença?',
+  'Anotou tudo hoje? Gasto não anotado também conta.', 'Pequenos gastos fazem grandes faturas.',
+  'Eu sou pato, mas não sou bobo.', 'Respira. Fecha o app da loja. Volta aqui.',
+  'Teu cartão pediu férias. Eu assinei embaixo.', 'Cuidado com o "é baratinho". Dez baratinhos é caro.',
+  'Pato fiscal, plantão 24 horas.', 'Só vim lembrar que a fatura chega todo mês. Sem falta.',
+  'Guardar um pouco todo mês é chato. Ficar sem nada é pior.', 'Você manda no dinheiro ou ele manda em você?',
+  'Hoje é um ótimo dia pra não comprar nada.', 'Se for comprar, compra. Mas anota aqui, hein.',
+  'Eu não vou embora. Pode ir se acostumando.', 'Faz um favor: abre a Previsão de vez em quando.',
+  'Teu eu do mês que vem agradece cada real guardado hoje.', 'Gasto invisível: aquele que você jura que não fez.',
+  'Uma pena pra cada compra por impulso. Logo fico careca.', 'Olhei o extrato e precisei sentar.',
+  'Você parece tímido financeiramente.',
+];
+const DUCK_ECONOMIA = [
+  'Olha só. Temos autocontrole.', 'Gastando {v} a menos que no mês passado até hoje. Aprendeu com quem?',
+  'Menos gasto que no mês passado. Tô impressionado. Não acostuma.', 'Economizando, é? Vou até tirar os óculos pra ver melhor.',
+  '{v} a menos que mês passado. Pode me agradecer.', 'Isso aí. Continua assim que eu paro de reclamar. Um pouco.',
+];
+const DUCK_EXAGERO = [
+  'Eu vi. Preferia não ter visto.', 'Esse mês tá mais caro que o passado. Bem mais.', 'Gastando mais que mês passado. Tá tudo bem em casa?',
+  'Mês passado você tava melhor. Só comentando.', 'O ritmo de gasto tá acelerado. Pisa no freio.',
+];
+const DUCK_SALDO_BAIXO = [
+  'Isso é saldo ou troco? {v}.', '{v} na conta. Eu já vi pato com mais pão guardado.', 'Saldo de {v}. Melhor não inventar moda.',
+];
+const DUCK_CHATO = [
+  'Eu não vou parar de falar. Desliga em Ajustes se tiver coragem.', 'Já conferiu o extrato hoje? Não? Imaginei.',
+  'Oi. Sou eu de novo.', 'Lembra de mim? Eu lembro dos teus gastos.', 'Quack. Quack. Quack. Paga as contas.',
+  'Tô entediado. Bora conferir a fatura?', 'Mais uma volta e eu conto quanto você gastou com besteira.',
+];
+// Reações ao salvar um gasto, conforme o tipo de compra.
+const DUCK_COMPRA = [
+  'Precisava mesmo?', 'Anotado. Mas que era desnecessário, era.', 'Mais um gasto... eu tô contando, viu?', 'Hmm. Interessante escolha.',
+  'Tá. Vou fingir que não vi.', 'Isso foi necessidade ou vontade?', 'Registrado na caderneta do pato.', 'Ok. Respira. Próximo.',
+];
+const DUCK_REPETIDA = [
+  'De novo? Interessante.', 'Outra vez {c}? Tá virando assinatura.', 'Isso de novo? Eu lembro da última vez, tá?',
+  'Você e {c}: um romance que custa caro.', '{n}ª vez em {c} esse mês. Tô contando.',
+];
+const DUCK_IMPULSO = [
+  'Me explica essa aqui.', 'Ah, era uma "necessidade".', 'Isso foi impulso, né? Pode falar, eu não conto.',
+  'Pequeno, mas eu vi.', 'Baratinho? Dez desses fazem um estrago.',
+];
+const DUCK_GRANDE = [
+  'Eu vi. Preferia não ter visto.', '{v}?! Me segura que eu vou desmaiar.', 'Gasto grande, hein. Tem certeza que cabe?',
+  '{v} de uma vez. Vou precisar de um minuto.', 'Uau. Isso aí doeu até em mim.',
+];
+tagPose(DUCK_ECONOMIA, 'aplaude'); tagPose(DUCK_EXAGERO, 'cobre'); tagPose(DUCK_SALDO_BAIXO, 'oculos'); tagPose(DUCK_CHATO, 'chama');
+tagPose(['Psiu. Vamos conversar.', 'Me explica uma coisa aqui.', 'Eu não vou embora. Pode ir se acostumando.'], 'chama');
+tagPose(['Isso é saldo ou troco?', 'Você parece tímido financeiramente.','Tô de olho em você. 👀', 'Quack. Só passando pra julgar.', 'Eu não julgo. Mentira, eu julgo sim.'], 'oculos');
+tagPose(['A sobra tá aqui, tá? Não esquece dela.', 'Anotou tudo hoje? Gasto não anotado também conta.', 'Faz um favor: abre a Previsão de vez em quando.'], 'aponta');
+tagPose(['Olhei o extrato e precisei sentar.', 'Óculos escuros pra não ver o tamanho da fatura.'], 'cobre');
+tagPose(['Você manda no dinheiro ou ele manda em você?', 'Promoção não é desconto se você não ia comprar.'], 'bracos');
+function duckLines() {
+  const urgent = [], L = [];
+  const m = curMonth(), tt = monthTotals(m);
+  const nm = (id) => catOf(id).name.toLowerCase();
+  // contas do mês sem marcar como paga (prioridade: o pato cobra pelo nome)
+  const late = payables(m).filter((p) => !p.paid && p.date <= today() + '');
+  const unpaid = payables(m).filter((p) => !p.paid);
+  const title = (p) => (p.kind === 'bill' ? `a fatura do ${p.c.name}` : `"${p.t.desc || catOf(p.t.cat).name}"`);
+  if (unpaid.length) {
+    const p = pick(late.length ? late : unpaid);
+    urgent.push(`Você não pagou ${title(p)} ainda. Tá esperando o quê?`,
+      `E ${title(p)}, hein? ${money(p.amount)} esperando. Paga logo, vai.`,
+      `${unpaid.length} conta${unpaid.length > 1 ? 's' : ''} sem pagar esse mês. Vai esperar cortarem?`,
+      `Ô, ${title(p)} tá aí parada. Vai pagar ou vai fingir que não viu?`);
+    tagPose(urgent, 'aponta');
+  }
+  // categoria campeã e comparação com o mês passado
+  const by = {}, byp = {};
+  for (const t of monthTx(m)) if (t.type === 'out') by[t.cat] = (by[t.cat] || 0) + t.amount;
+  for (const t of monthTx(shiftMonth(m, -1))) if (t.type === 'out') byp[t.cat] = (byp[t.cat] || 0) + t.amount;
+  const top = Object.entries(by).sort((a, b) => b[1] - a[1])[0];
+  if (top) L.push(...tagPose([`${money(top[1])} em ${nm(top[0])} esse mês? Tá achando que é rico?`, `Teu maior gasto é ${nm(top[0])}: ${money(top[1])}. Só tô falando.`], 'oculos'));
+  for (const [cid, v] of Object.entries(by)) {
+    const old = byp[cid];
+    if (old && v > old * 1.3 && v - old > 5000) L.push(...tagPose([`${catOf(cid).name} subiu ${Math.round((v / old - 1) * 100)}% desde o mês passado. Tá alimentando um batalhão?`], 'cobre'));
+  }
+  // saldo, sobra e previsão
+  const conta = contaAte(m), bal = tt.i - tt.o - tt.inv;
+  if (conta < 0) urgent.push(...tagPose(['Saldo em conta negativo. Daqui a pouco vai ter que arrumar um bico pra fazer.'], 'cobre'));
+  else if (conta < 20000) L.push(`Só ${money(conta)} na conta. Segura esse cartão aí, campeão.`);
+  if (tt.i && tt.o > tt.i) L.push(...tagPose(['Tá gastando mais do que ganha. Daqui a pouco vai ter que arrumar um bico pra fazer.'], 'cobre'));
+  else if (bal > 50000) L.push(...tagPose([`Vai sobrar ${money(bal)} esse mês. Tô quase orgulhoso. Quase.`], 'aplaude'));
+  for (let k = 1; k <= 11; k++) {
+    const mm = shiftMonth(m, k), x = monthTotals(mm);
+    if (x.i - x.o - x.inv < 0) { L.push(...tagPose([`Em ${monthLabel(mm).toLowerCase()} você fica no vermelho. Já pode ir vendendo um rim.`], 'cobre')); break; }
+  }
+  const fixedSum = monthTx(m).filter((t) => t.rule && t.type === 'out').reduce((a, t) => a + t.amount, 0);
+  if (tt.i && fixedSum > tt.i * 0.6) L.push(`Os gastos fixos comem ${Math.round(fixedSum / tt.i * 100)}% do que você ganha. Socorro.`);
+  // combustível
+  const fuel = S.tx.filter((t) => t.cat === FUEL && t.type === 'out' && t.date.startsWith(m));
+  if (fuel.length >= 3) L.push(...tagPose([`${fuel.length} abastecimentos esse mês. Esse carro bebe mais que você.`], 'bracos'));
+  else if (fuel.length) L.push(`${money(fuel.reduce((a, t) => a + t.amount, 0))} de gasolina esse mês. Já pensou em ir de bicicleta?`);
+  // parcelas acabando
+  for (const r of S.fixed) {
+    if (r.type !== 'out' || !r.n || !r.end) continue;
+    const left = monthDiff(m, r.end) + 1;
+    if (left >= 1 && left <= 2) L.push(`Faltam ${left} parcela${left > 1 ? 's' : ''} de ${r.desc || catOf(r.cat).name}. Nem pensa em parcelar outra coisa.`);
+  }
+  // investimento
+  for (const v of S.inv) {
+    const d = nextCredit(simulate(v, today()));
+    if (d > 0) L.push(`Teu investimento rende ${money(d)} por dia. O pato aqui ganha mais catando pão.`);
+  }
+  // gastando menos que no mês passado até o mesmo dia
+  const dia = today().slice(8, 10), pm = shiftMonth(m, -1);
+  const ateHoje = (mm) => monthTx(mm).filter((t) => t.type === 'out' && t.date.slice(8, 10) <= dia).reduce((a, t) => a + t.amount, 0);
+  const agora = ateHoje(m), antes = ateHoje(pm);
+  if (antes && agora < antes * 0.85) L.push(...DUCK_ECONOMIA.map((s) => s.replace('{v}', money(antes - agora))));
+  if (antes && agora > antes * 1.25) L.push(...DUCK_EXAGERO);
+  if (conta >= 0 && conta < 50000) L.push(...DUCK_SALDO_BAIXO.map((s) => s.replace('{v}', money(conta))));
+  // genéricas: muitas, para quase nunca repetir
+  L.push(...DUCK_GERAIS);
+  if (duckLevel() === 'chato') L.push(...DUCK_CHATO);
+  return { urgent, L };
+}
+// Falas sobre a aba que está aberta.
+function duckTabLines(tab) {
+  const L = [];
+  const m = curMonth();
+  if (tab === 'inv') {
+    if (!S.inv.length) return ['Nem investimento tem. Tá guardando dinheiro debaixo do colchão?', 'Aba de investimento vazia. Que tristeza, hein.'];
+    for (const v of S.inv) {
+      const hist = simulate(v, today()), d = nextCredit(hist), bal = hist.end;
+      const y1 = simulate(v, addMonthsISO(today(), 12)).end, earned = (hist.months[m] || {}).earn || 0;
+      L.push(`${money(d)} por dia útil. Com esse rendimento dá pra comprar um chiclete. Por semana.`,
+        `Rendeu ${moneyR(earned)} esse mês. Não gasta tudo num lugar só, hein.`,
+        `Em 1 ano vai ter ${moneyR(y1)}. Se não mexer, claro. Mas você vai mexer.`,
+        `${moneyR(bal)} investidos e já se achando o Warren Buffett.`,
+        `Aplica mais aí, pão-duro. Dinheiro parado na conta não rende nada.`,
+        `Tá olhando o investimento de novo? Ele não vai crescer mais rápido porque você tá olhando.`,
+        `Resgatar? Nem pensa nisso.`);
+      if (v.ir !== false) L.push(`O IR leva ${fmtPct(irAt(v, today()) * 100)} do teu rendimento. O leão agradece.`);
+    }
+    L.push(`O CDI tá ${fmtPct(S.cdi)} e você aí, parado.`);
+    return L;
+  }
+  if (tab === 'prev') {
+    let firstNeg = null, worst = null;
+    for (let k = 0; k < 12; k++) {
+      const mm = shiftMonth(m, k), x = monthTotals(mm), b = x.i - x.o - x.inv;
+      if (b < 0 && !firstNeg) firstNeg = mm;
+      if (!worst || b < worst.b) worst = { mm, b };
+    }
+    if (firstNeg) L.push('Com essa previsão aqui a gente não vai durar muito tempo.', `${cap(monthLabel(firstNeg).toLowerCase())} no vermelho. Já pode ir procurando um bico.`);
+    else L.push('Previsão toda positiva... por enquanto. Espera o próximo iFood.', 'Tá tudo azul na previsão. Desconfio.');
+    if (worst) L.push(`O pior mês é ${monthLabel(worst.mm).toLowerCase()}: sobra ${signedMoney(worst.b)}. Se prepara.`);
+    const fixedTotal = monthTx(shiftMonth(m, 1)).filter((t) => t.rule && t.type === 'out').reduce((a, t) => a + t.amount, 0);
+    if (fixedTotal) L.push(`Só de conta fixa no mês que vem são ${money(fixedTotal)}. E você aí querendo viajar.`);
+    L.push('Olhando o futuro? Eu já vi. Não é bonito.');
+    return L;
+  }
+  if (tab === 'list') {
+    const n = monthTx(ui.month).filter((t) => t.type === 'out').length;
+    L.push('Vixe, já vai colocar mais gasto?', 'Procurando aquele gasto que você esqueceu de anotar?', 'Lista grande, hein. Tá gastando por esporte?');
+    if (n) L.push(`${n} gasto${n > 1 ? 's' : ''} em ${monthLabel(ui.month).toLowerCase()}. E contando.`);
+    const food = monthTx(ui.month).filter((t) => t.cat === 'restaurantes').length;
+    if (food >= 3) L.push(`${food} vezes comendo fora esse mês. Fogão de casa tá de enfeite?`);
+    return L;
+  }
+  if (tab === 'cfg') return ['Mexendo nos ajustes? Vai me desligar, é? Tenta.', 'Se tirar o pato, o app perde a graça. Só avisando.', 'Faz backup aí. Depois não vem chorar.'];
+  return [];
+}
+function pickDuckLine() {
+  const { urgent, L } = duckLines();
+  const tabL = duckTabLines(ui.tab);
+  // fora do Resumo, fala mais da aba aberta; no Resumo, metade das vezes cobra conta, se tiver
+  let pool;
+  if (tabL.length && Math.random() < 0.65) pool = tabL;
+  else if (urgent.length && Math.random() < 0.55) pool = urgent;
+  else pool = L.concat(urgent);
+  return duckFresh(pool);
+}
+// Escolhe uma fala que não saiu há pouco tempo. Lembra das últimas 60, mesmo fechando o app
+// (chave própria, separada dos dados financeiros).
+function duckFresh(pool) {
+  if (!duck.heard) { try { duck.heard = JSON.parse(localStorage.getItem('financas.pato.falas')) || []; } catch (e) { duck.heard = []; } }
+  let fresh = pool.filter((s) => !duck.heard.includes(s));
+  if (!fresh.length) {
+    // todas já saíram: usa a que saiu há mais tempo
+    fresh = pool.slice().sort((a, b) => duck.heard.indexOf(b) - duck.heard.indexOf(a)).slice(0, 3);
+  }
+  const line = pick(fresh);
+  duck.heard = [line, ...duck.heard.filter((s) => s !== line)].slice(0, 60);
+  try { localStorage.setItem('financas.pato.falas', JSON.stringify(duck.heard)); } catch (e) { /* sem espaço: tudo bem */ }
+  return line;
+}
+// Ao entrar numa aba, ele comenta sobre ela (mais vezes quanto mais chato).
+function duckOnTab() {
+  if (duckLevel() === 'off') return;
+  const chance = { calm: 0.3, zoeiro: 0.7, chato: 1 }[duckLevel()];
+  if (Math.random() > chance) return;
+  const tabL = duckTabLines(ui.tab);
+  const pool = tabL.length ? tabL : duckLines().urgent.concat(duckLines().L);
+  clearTimeout(duck.tabT);
+  duck.tabT = setTimeout(() => {
+    if (!sheetsClosed()) return;
+    duckSay(duckFresh(pool));
+  }, 1200);
+}
+// Depois de salvar um lançamento novo, ele reage.
+function duckOnSave(tx) {
+  if (duckLevel() === 'off' || !tx) return;
+  const chance = { calm: 0.35, zoeiro: 0.75, chato: 1 }[duckLevel()];
+  if (Math.random() > chance) return;
+  const c = catOf(tx.cat).name.toLowerCase();
+  let lines;
+  if (tx.type === 'in') {
+    lines = [`Opa, ${money(tx.amount)} entrando! Não gasta tudo de uma vez.`, 'Dinheiro entrando? Finalmente uma notícia boa.',
+      'Receita anotada. Agora segura pra não sair tudo no fim de semana.', 'Entrou dinheiro. Já separa um pouco antes de gastar.',
+      'Olha só, dinheiro chegando. Vou ficar de guarda.', 'Receita! Guarda uma parte. Por mim.'];
+    tagPose(lines, 'aplaude');
+  } else {
+    // tipo da compra: grande, repetida, pequena por impulso ou comum
+    const desde = addMonthsISO(today(), -2);
+    const outs = S.tx.filter((t) => t.type === 'out' && t.date >= desde && t.id !== tx.id);
+    const media = outs.length ? outs.reduce((a, t) => a + t.amount, 0) / outs.length : 0;
+    const mesCat = monthTx(tx.date.slice(0, 7)).filter((t) => t.type === 'out' && t.cat === tx.cat).length;
+    const fill = (arr) => arr.map((s) => s.replace('{v}', money(tx.amount)).replace(/\{c\}/g, c).replace('{n}', mesCat));
+    if (media && tx.amount >= media * 2.5 && tx.amount >= 15000) lines = tagPose(fill(DUCK_GRANDE), 'cobre');
+    else if (mesCat >= 3 && !tx.rule) lines = tagPose(fill(DUCK_REPETIDA), 'bracos');
+    else if (tx.amount <= 3000 && !tx.rule) lines = tagPose(fill(DUCK_IMPULSO), 'aponta');
+    else lines = tagPose(fill(DUCK_COMPRA).concat(`Vixe, mais ${money(tx.amount)} em ${c}.`, `${money(tx.amount)}? Precisava mesmo?`), 'oculos');
+  }
+  setTimeout(() => duckSay(duckFresh(lines)), 700);
+}
+function scheduleTalk(ms) {
+  const lv = duckLevel();
+  const base = ms != null ? ms : lv === 'calm' ? 60000 + Math.random() * 40000 : lv === 'chato' ? 10000 + Math.random() * 10000 : 25000 + Math.random() * 20000;
+  duck.nextTalk = performance.now() + base;
+}
+const sheetsClosed = () => !document.querySelector('.wrap.open');
+function duckSay(text, pose) {
+  const b = $('#dbub');
+  text = text || pickDuckLine();
+  b.textContent = text;
+  // vira de frente e faz o gesto da fala (sem gesto enquanto está sendo carregado ou voando)
+  if (!duck.drag && duck.state === 'walk') {
+    // metade das vezes usa a pose que combina com a fala; senão sorteia entre todas. Nunca repete a última.
+    const outras = Object.keys(DUCK_POSES).filter((k) => k !== duck.lastPose);
+    const combina = pose || DUCK_POSE.get(text);
+    const nome = combina && combina !== duck.lastPose && (pose || Math.random() < 0.5) ? combina : pick(outras);
+    duck.lastPose = nome;
+    const p = DUCK_POSES[nome];
+    const now = performance.now();
+    duck.pose = { ...p, t0: now, until: now + 6000 };
+  }
+  b.classList.add('show');
+  duck.pauseUntil = performance.now() + 6500;
+  clearTimeout(duck.hideT);
+  duck.hideT = setTimeout(() => b.classList.remove('show'), 6500);
+  scheduleTalk();
+}
+function duckTick(t) {
+  duck.raf = requestAnimationFrame(duckTick);
+  const el = $('#duck');
+  const dt = Math.min(0.05, (t - (duck.lastT || t)) / 1000);
+  duck.lastT = t;
+  const W = document.documentElement.clientWidth, size = 52;
+  const top = Math.max(120, window.innerHeight - 220); // altura máxima que ele pode subir
+  if (duck.state === 'fly') {
+    // jogado: gravidade, quica nas bordas e no chão
+    duck.vy -= 2200 * dt;
+    duck.x += duck.vx * dt; duck.y += duck.vy * dt;
+    duck.rot += duck.vx * dt * 0.9;
+    if (duck.x < 0) { duck.x = 0; duck.vx = -duck.vx * 0.6; }
+    if (duck.x > W - size) { duck.x = W - size; duck.vx = -duck.vx * 0.6; }
+    if (duck.y > top) { duck.y = top; duck.vy = -Math.abs(duck.vy) * 0.4; }
+    if (duck.y <= 0) {
+      duck.y = 0;
+      if (duck.vy < -380) { duck.vy = -duck.vy * 0.35; duck.vx *= 0.7; }
+      else { duck.state = 'walk'; duck.vx = duck.vy = 0; duck.rot = 0; duckLanded(); }
+    }
+  }
+  const walking = duck.state === 'walk' && t > duck.pauseUntil && sheetsClosed();
+  if (walking) {
+    duck.x += duck.dir * duck.speed * dt;
+    if (duck.x > W - size - 6) { duck.x = W - size - 6; duck.dir = -1; }
+    if (duck.x < 6) { duck.x = 6; duck.dir = 1; }
+    if (Math.random() < 0.0015) duck.dir *= -1; // muda de ideia de vez em quando
+  }
+  el.classList.toggle('walk', walking);
+  // quadro do desenho: de frente durante a fala; andando, o passo acompanha a distância (o pé não escorrega)
+  let fx = 0, fy = 0, front = false;
+  const now = performance.now(); // mesmo relógio do duckSay (o t do requestAnimationFrame pode vir atrasado)
+  if (duck.pose && now < duck.pose.until && !duck.drag && duck.state === 'walk') {
+    front = true; fy = duck.pose.row || 0;
+    const e = Math.max(0, now - duck.pose.t0);
+    fx = e < 880 ? Math.min(3, Math.floor(e / 220)) : duck.pose.loop ? 2 + Math.floor(e / 300) % 2 : 3;
+  } else {
+    duck.pose = null;
+    if (walking) duck.dist = (duck.dist || 0) + duck.speed * dt;
+    else if (duck.drag) duck.dist = (duck.dist || 0) + 40 * dt; // pernas pedalando no ar
+    // o ciclo de 32 quadros anda 14,17 px na tela (56,67 px no quadro de 256): 0,443 px por quadro
+    const f = Math.max(0, Math.floor((duck.dist || 0) / 0.443)) % 32;
+    fx = f % 8; fy = Math.floor(f / 8);
+  }
+  el.classList.toggle('front', front);
+  const cw = front ? 52 : 64, ch = front ? 49 : 64;
+  $('.dfr').style.backgroundPosition = `${-fx * cw}px ${-fy * ch}px`;
+  el.style.transform = `translate(${duck.x}px, ${-duck.y}px)`;
+  $('#dsprite').style.transform = `scaleX(${front ? 1 : duck.dir}) rotate(${duck.rot}deg)`;
+  // balão sempre dentro da tela
+  const b = $('#dbub'), bw = b.offsetWidth;
+  b.style.left = Math.max(8 - duck.x, Math.min(size / 2 - bw / 2, W - 8 - duck.x - bw)) + 'px';
+  if (duck.state === 'walk' && t > duck.nextTalk && sheetsClosed() && document.visibilityState === 'visible') duckSay();
+}
+// Cara brava por alguns segundos.
+function duckAngry(ms = 4000) {
+  const el = $('#duck');
+  el.classList.remove('angry'); void el.offsetWidth; el.classList.add('angry');
+  clearTimeout(duck.angryT);
+  duck.angryT = setTimeout(() => el.classList.remove('angry'), ms);
+}
+function duckLanded() {
+  if (duck.throwSpeed > 1100) {
+    duckAngry(5000);
+    duckSay(duckFresh(['AAAAH! Tá maluco?!', 'Ei! Isso é jeito de tratar um pato?', 'Me jogou?! Vou contar teus gastos pra todo mundo.',
+      'Ai, minha asa! Vou cobrar o tratamento no teu cartão.', 'Faz isso de novo e eu apago teu saldo. Brincadeira. Ou não.',
+      'Tá descontando em mim porque a fatura veio alta?']));
+  } else {
+    duckSay(duckFresh(['Me põe no chão direito, pô.', 'Pato não voa assim, tá?', 'Ufa. Chão.', 'Da próxima vez, me avisa antes.']));
+  }
+}
+function duckStart() {
+  const el = $('#duck');
+  if (duckLevel() === 'off') { el.hidden = true; cancelAnimationFrame(duck.raf); duck.raf = 0; $('#dbub').classList.remove('show'); return; }
+  el.hidden = false;
+  scheduleTalk(6000);
+  if (!duck.raf) { duck.lastT = 0; duck.raf = requestAnimationFrame(duckTick); }
+}
+// Tocar = cutucar; segurar e arrastar = carregar; soltar arrastando rápido = jogar.
+function duckPoke() {
+  const now = Date.now();
+  duck.taps = duck.taps.filter((x) => now - x < 4000).concat(now);
+  if (duck.taps.length >= 3) {
+    duckAngry();
+    duckSay(duckFresh(['Para de me cutucar!', 'Ei! Vai cutucar tua fatura.', 'Mais um toque e eu conto teus gastos pra todo mundo.',
+      'Tá carente? Vai ver teu extrato.', 'Para! Eu bico, hein.']));
+  } else duckSay();
+}
+$('#duck').addEventListener('pointerdown', (e) => {
+  const el = $('#duck');
+  try { el.setPointerCapture(e.pointerId); } catch (err) { /* segue sem captura */ }
+  duck.drag = { id: e.pointerId, cx: e.clientX, cy: e.clientY, x0: duck.x, y0: duck.y, moved: false, samples: [[e.clientX, e.clientY, performance.now()]] };
+});
+$('#duck').addEventListener('pointermove', (e) => {
+  const d = duck.drag;
+  if (!d || d.id !== e.pointerId) return;
+  if (!d.moved && Math.hypot(e.clientX - d.cx, e.clientY - d.cy) > 8) {
+    d.moved = true;
+    duck.state = 'drag'; duck.rot = 0;
+    $('#duck').classList.add('drag');
+    duckSay(duckFresh(['Ei! Me solta!', 'Pra onde você tá me levando?', 'Sequestro de pato! Socorro!', 'Me larga, eu tenho contas pra cobrar!']));
+  }
+  if (!d.moved) return;
+  const W = document.documentElement.clientWidth;
+  duck.x = Math.max(0, Math.min(W - 52, d.x0 + (e.clientX - d.cx)));
+  duck.y = Math.max(0, d.y0 - (e.clientY - d.cy));
+  if (e.clientX !== d.samples[d.samples.length - 1][0]) duck.dir = e.clientX > d.samples[d.samples.length - 1][0] ? 1 : -1;
+  d.samples.push([e.clientX, e.clientY, performance.now()]);
+  if (d.samples.length > 6) d.samples.shift();
+});
+function duckRelease(e) {
+  const d = duck.drag;
+  if (!d || d.id !== e.pointerId) return;
+  duck.drag = null;
+  $('#duck').classList.remove('drag');
+  if (!d.moved) { duckPoke(); return; }
+  // velocidade do arraste (px/s) a partir dos últimos movimentos do dedo
+  const a = d.samples[0], z = d.samples[d.samples.length - 1], dtS = Math.max(0.016, (z[2] - a[2]) / 1000);
+  duck.vx = (z[0] - a[0]) / dtS;
+  duck.vy = -(z[1] - a[1]) / dtS;
+  duck.throwSpeed = Math.hypot(duck.vx, duck.vy);
+  duck.state = 'fly';
+}
+$('#duck').addEventListener('pointerup', duckRelease);
+$('#duck').addEventListener('pointercancel', duckRelease);
+
 // Tema: escuro é o padrão. A barra de status do iPhone segue o tema na próxima abertura do app.
 function applyTheme() {
   const light = S.theme === 'light';
@@ -1979,6 +2422,7 @@ function applyTheme() {
 
 applyTheme();
 render();
+duckStart();
 // Voltou de um recarregamento pedido pelo 🎤: reabre a janela de voz já ouvindo.
 try {
   if (sessionStorage.getItem('autoVoice')) { sessionStorage.removeItem('autoVoice'); setTimeout(() => openInv('voice'), 350); }
@@ -2007,7 +2451,18 @@ async function forceUpdate() {
 
 // Atualização: procura versão nova ao abrir e ao voltar para o app; quando o service worker
 // novo assume, recarrega sozinho uma vez (não precisa abrir duas vezes).
-if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+// No PC (localhost) não usa service worker: sempre carrega os arquivos novos e funciona até no
+// navegador do Claude, onde o service worker não consegue buscar nada na rede.
+const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
+if (isLocal && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((regs) => regs.forEach((r) => r.unregister())).catch(() => {});
+  if (window.caches) caches.keys().then((ks) => ks.forEach((k) => caches.delete(k))).catch(() => {});
+  fetch('sw.js', { cache: 'no-store' }).then((r) => r.text()).then((t) => {
+    const m = t.match(/VERSION = '([^']+)'/);
+    if (m) { ui.appVersion = m[1] + ' (PC)'; if (ui.tab === 'cfg') render(); }
+  }).catch(() => {});
+}
+if ('serviceWorker' in navigator && location.protocol.startsWith('http') && !isLocal) {
   const hadController = !!navigator.serviceWorker.controller;
   let reloaded = false;
   navigator.serviceWorker.addEventListener('controllerchange', () => {

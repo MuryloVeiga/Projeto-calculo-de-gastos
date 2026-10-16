@@ -1,0 +1,7 @@
+Ferramenta: geração de imagens integrada.
+
+PROMPT DA ARTE FINAL
+Use the supplied transparent yellow duck as the exact character reference. Create a clean transparent cutout parts sheet for animation. THREE separate isolated pieces ONLY, no full walking ducks: 1. TOP area a large RIGHT-facing yellow duck HEAD AND BODY with sunglasses, beak, tail and oval wing but NO legs or feet whatsoever; smooth round belly. 2. BOTTOM LEFT a single small orange vertical rounded leg segment, no foot. 3. BOTTOM RIGHT one orange duck foot facing right, flat on imaginary ground, rounded long toe and short raised heel. Keep parts very well separated with generous transparent padding. The main body occupies upper 65% of image; two leg parts lower 25%. Match the reference golden yellow body, black sunglasses, small orange beak, simple gentle shading exactly. Actual completely transparent background as in reference. No backdrop, no colored aura, no drop shadow, no gradients outside shapes, no text, no grid. Only the solid duck pieces are visible on empty alpha canvas.
+
+AJUSTE FINAL
+Change ONLY the duck's beak from open smiling to CLOSED, short orange triangular duck bill like a cool unimpressed duck. Preserve EVERYTHING else: exact head/body proportions, golden colors, black sunglasses, tail, wing, smooth legless belly; isolated orange leg and foot parts at bottom; exact transparent background and arrangement. No new background, no glow. This is a cutout animation parts sheet, not a complete duck pose.
