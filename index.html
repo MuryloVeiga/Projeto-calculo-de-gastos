@@ -1021,7 +1021,7 @@ $('#prev').addEventListener('click', () => { ui.month = shiftMonth(ui.month, -1)
 $('#next').addEventListener('click', () => { ui.month = shiftMonth(ui.month, 1); render(); });
 $('#mlabel').addEventListener('click', () => { ui.month = today().slice(0, 7); render(); });
 $('#fab').addEventListener('click', () => openSheet(null));
-$('#mic').addEventListener('click', () => openInv('voice'));
+$('#mic').addEventListener('click', () => micTap());
 
 view.addEventListener('input', (e) => {
   if (e.target.id === 'q') { ui.q = e.target.value; $('#listBody').innerHTML = listBody(); }
@@ -1430,7 +1430,7 @@ function openInv(mode, id) {
   openWrap(wrap3);
   if (mode === 'voice') {
     $('#vMic').addEventListener('click', () => {
-      if (listening) { stopListen(); setListenUI(false, 'Toque no microfone e fale.'); } else startListen();
+      if (listening) { stopListen(); setListenUI(false, 'Toque no microfone e fale.'); } else micTap();
     });
     setTimeout(startListen, 300);
     return;
@@ -1615,7 +1615,7 @@ const VOICE_KEYS = {
     [/\b(supermercado|mercado|feira|atacadao|assai|hortifruti)\b/, 'mercado'],
     [/\b(gasolina|etanol|alcool|combustivel|abasteci|abastecimento|posto)\b/, 'combustivel'],
     [/\b(ifood|pizza|lanche|hamburguer|restaurante|almoco|jantar|cafe|padaria|acai|sorvete|marmita)\b/, 'restaurantes'],
-    [/\b(uber|onibus|metro|estacionamento|pedagio|oficina|mecanico|lava jato|pneu)\b/, 'transporte'],
+    [/\b(carro|veiculo|moto|uber|onibus|metro|estacionamento|pedagio|oficina|mecanico|lava jato|pneu|ipva|licenciamento|multa|revisao|oleo|borracharia|alinhamento|seguro do carro)\b/, 'transporte'],
     [/\b(farmacia|remedio|medico|consulta|exame|dentista|hospital)\b/, 'saude'],
     [/\b(cinema|bar|show|jogo|balada|viagem|passeio)\b/, 'lazer'],
     [/\b(luz|energia|agua|internet|telefone|celular|gas)\b/, 'contas'],
@@ -1664,6 +1664,8 @@ function parseVoice(raw) {
     const k = t.match(re);
     if (k) { if (!p.cat && cats.some((c) => c.id === id)) p.cat = id; if (!p.desc) p.desc = voiceDesc(raw, k[0].trim()); break; }
   }
+  // nada reconhecido: "Outros" (e não a primeira da lista, que é Mercado)
+  if (!p.cat) { const o = cats.find((c) => c.id === (p.type === 'in' ? 'outros-in' : 'outros')); if (o) p.cat = o.id; }
   return p;
 }
 // Descrição com a palavra como foi falada (com acento): "farmácia" → "Farmácia".
@@ -1690,7 +1692,17 @@ function setListenUI(on, msg) {
 // Por isso: modo contínuo no iOS, para sozinho 1,5 s depois da última palavra, e se em 6 s não vier
 // nada, desiste e pede para usar o ditado do teclado (que sempre funciona). A linha pequena mostra os
 // eventos do microfone para diagnóstico.
-let listenTimers = [];
+let listenTimers = [], voiceRec = null, voiceUsed = false;
+// No iPhone a voz costuma funcionar só uma vez por abertura do app. Depois do 1º uso, tocar no 🎤
+// recarrega o app (os dados ficam) e já reabre a janela de voz ouvindo.
+function micTap() {
+  if (voiceUsed && isIOS) {
+    try { sessionStorage.setItem('autoVoice', '1'); } catch (e) {}
+    location.reload();
+    return;
+  }
+  if (wrap3.hidden || I.mode !== 'voice') openInv('voice'); else startListen();
+}
 const clearListenTimers = () => { listenTimers.forEach(clearTimeout); listenTimers = []; };
 function vDiag(tag) { const d = $('#vDiag'); if (d) d.textContent = (d.textContent ? d.textContent + ' › ' : '') + tag; }
 function keyboardFallback(msg) {
@@ -1710,7 +1722,8 @@ function startListen() {
     if (text && !wrap3.hidden) { submitted = true; stopListen(); setListenUI(false, 'Entendi!'); $('#sheet3').requestSubmit(); }
   };
   try {
-    rec = new SR();
+    rec = voiceRec || (voiceRec = new SR()); // o mesmo "ouvinte" sempre (criar outro falha em alguns iPhones)
+    voiceUsed = true;
     rec.lang = 'pt-BR'; rec.interimResults = true; rec.continuous = isIOS; rec.maxAlternatives = 1;
     rec.onstart = () => vDiag('início');
     rec.onaudiostart = () => vDiag('microfone');
@@ -1797,6 +1810,10 @@ function applyTheme() {
 
 applyTheme();
 render();
+// Voltou de um recarregamento pedido pelo 🎤: reabre a janela de voz já ouvindo.
+try {
+  if (sessionStorage.getItem('autoVoice')) { sessionStorage.removeItem('autoVoice'); setTimeout(() => openInv('voice'), 350); }
+} catch (e) {}
 refreshCdi();
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible' || !wrap.hidden) return; // não atrapalha um lançamento sendo digitado
