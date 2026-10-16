@@ -213,6 +213,8 @@ main{max-width:640px;margin:0 auto;
   box-shadow:0 6px 22px rgba(201,169,110,.35)}
 .vmic svg{width:38px;height:38px}
 .vmic.on{animation:vpulse 1.2s ease-in-out infinite}
+.vdiag{font-size:11px;color:var(--muted);opacity:.7;margin:-6px 0 0;min-height:14px}
+#vText.hl{border-color:var(--brand);box-shadow:0 0 0 3px rgba(201,169,110,.25)}
 @keyframes vpulse{0%,100%{box-shadow:0 0 0 0 rgba(201,169,110,.55)}50%{box-shadow:0 0 0 16px rgba(201,169,110,0)}}
 #tabs{position:fixed;inset:auto 0 0 0;z-index:15;background:var(--bar);
   -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding-bottom:var(--sab)}
@@ -1407,7 +1409,7 @@ function openInv(mode, id) {
     title = '🎤 Lançar por voz';
     body = `<div class="vwrap"><button type="button" id="vMic" class="vmic" aria-label="Ouvir">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg></button>
-        <p class="note" id="vStatus">Toque no microfone e fale.</p></div>`
+        <p class="note" id="vStatus">Toque no microfone e fale.</p><p class="vdiag" id="vDiag"></p></div>`
       + txtField('vText', 'O que entendi (dá para corrigir ou digitar)', '', 'placeholder="ex.: gastei 50 no mercado no Santander"')
       + `<p class="note" style="margin-top:8px">Exemplos: “gastei 80 reais de pizza no crédito”, “mercado 230 no Santander ontem”, “recebi 500 de freela”.</p>`;
   } else if (mode === 'fuel') {
@@ -1684,38 +1686,75 @@ function setListenUI(on, msg) {
   if (b) b.classList.toggle('on', on);
   if (s && msg) s.textContent = msg;
 }
+// No iPhone (app na tela de início) o reconhecimento às vezes abre o microfone e nunca devolve texto.
+// Por isso: modo contínuo no iOS, para sozinho 1,5 s depois da última palavra, e se em 6 s não vier
+// nada, desiste e pede para usar o ditado do teclado (que sempre funciona). A linha pequena mostra os
+// eventos do microfone para diagnóstico.
+let listenTimers = [];
+const clearListenTimers = () => { listenTimers.forEach(clearTimeout); listenTimers = []; };
+function vDiag(tag) { const d = $('#vDiag'); if (d) d.textContent = (d.textContent ? d.textContent + ' › ' : '') + tag; }
+function keyboardFallback(msg) {
+  setListenUI(false, msg);
+  const f = $('#vText');
+  if (f) { f.classList.add('hl'); f.placeholder = 'Toque aqui e use o 🎤 do teclado'; }
+}
 function startListen() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { setListenUI(false, 'Este navegador não ouve por aqui: toque no campo abaixo e use o 🎤 do teclado.'); return; }
+  if (!SR) { keyboardFallback('Este navegador não ouve por aqui: toque no campo abaixo e use o 🎤 do teclado.'); return; }
   stopListen();
-  let finalText = '';
+  if ($('#vDiag')) $('#vDiag').textContent = '';
+  let text = '', gotResult = false, submitted = false;
+  const finish = () => {
+    clearListenTimers();
+    if (submitted) return;
+    if (text && !wrap3.hidden) { submitted = true; stopListen(); setListenUI(false, 'Entendi!'); $('#sheet3').requestSubmit(); }
+  };
   try {
     rec = new SR();
-    rec.lang = 'pt-BR'; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 1;
+    rec.lang = 'pt-BR'; rec.interimResults = true; rec.continuous = isIOS; rec.maxAlternatives = 1;
+    rec.onstart = () => vDiag('início');
+    rec.onaudiostart = () => vDiag('microfone');
+    rec.onspeechstart = () => vDiag('voz');
     rec.onresult = (e) => {
-      const txt = Array.from(e.results).map((r) => r[0].transcript).join(' ').trim();
-      if ($('#vText')) $('#vText').value = txt;
-      if (e.results[e.results.length - 1].isFinal) finalText = txt;
+      if (!gotResult) vDiag('texto');
+      gotResult = true;
+      text = Array.from(e.results).map((r) => r[0].transcript).join(' ').replace(/\s+/g, ' ').trim();
+      if ($('#vText')) $('#vText').value = text;
+      clearListenTimers();
+      listenTimers.push(setTimeout(finish, e.results[e.results.length - 1].isFinal && !isIOS ? 300 : 1500));
     };
     rec.onerror = (e) => {
+      vDiag('erro: ' + e.error);
+      clearListenTimers();
       const blocked = e.error === 'not-allowed' || e.error === 'service-not-allowed';
-      setListenUI(false, blocked ? 'O iPhone bloqueou a voz aqui: toque no campo abaixo e use o 🎤 do teclado.'
-        : e.error === 'no-speech' ? 'Não ouvi nada. Toque no microfone e tente de novo.' : 'Não consegui ouvir. Tente de novo ou digite.');
+      if (blocked || e.error === 'audio-capture') keyboardFallback('O iPhone não liberou a voz aqui: toque no campo abaixo e use o 🎤 do teclado.');
+      else if (e.error === 'no-speech') setListenUI(false, 'Não ouvi nada. Toque no microfone e tente de novo.');
+      else if (e.error !== 'aborted') keyboardFallback('Não consegui ouvir: toque no campo abaixo e use o 🎤 do teclado.');
     };
     rec.onend = () => {
+      vDiag('fim');
       rec = null;
-      if (finalText && !wrap3.hidden) { setListenUI(false, 'Entendi!'); $('#sheet3').requestSubmit(); }
+      if (text) finish();
       else if (listening) setListenUI(false, 'Toque no microfone e fale.');
     };
     rec.start();
     setListenUI(true, 'Ouvindo… pode falar.');
+    // 6 s sem nenhum texto: o reconhecimento travou (comum no iPhone) → plano B
+    listenTimers.push(setTimeout(() => {
+      if (gotResult) return;
+      stopListen();
+      keyboardFallback('A voz do iPhone não respondeu: toque no campo abaixo e use o 🎤 do teclado.');
+    }, 6000));
   } catch (err) {
-    setListenUI(false, 'Não consegui ligar o microfone: use o 🎤 do teclado no campo abaixo.');
+    vDiag('erro ao ligar');
+    keyboardFallback('Não consegui ligar o microfone: toque no campo abaixo e use o 🎤 do teclado.');
   }
 }
 function stopListen() {
+  clearListenTimers();
   if (rec) { try { rec.abort(); } catch (e) {} rec = null; }
   listening = false;
+  const b = $('#vMic'); if (b) b.classList.remove('on');
 }
 
 /* ---------- fechar janelas: botão ✕ e arrastar para baixo ---------- */
