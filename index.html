@@ -14,15 +14,24 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <title>Finanças</title>
 <style>
-/* Tema "cartão black": sempre escuro, preto fosco com detalhes dourados. */
+/* Tema "cartão black" (padrão): preto fosco com detalhes dourados.
+   Modo claro (Ajustes): <html data-theme="light">, creme com dourado mais escuro. */
 :root{
   color-scheme:dark;
   --bg:#000000; --card:#0f0f10; --text:#f1ede4; --muted:#8b877e; --line:#242325;
   --brand:#c9a96e; --brand-2:#e9d5a6; --in:#dcc28a; --out:#ff7a70; --chip:#1a1a1b;
   --gold:linear-gradient(135deg,#f3e2b3 0%,#c9a96e 45%,#9a7a45 100%);
   --shadow:0 0 0 1px rgba(255,255,255,.05);
+  --bar:rgba(0,0,0,.84); --seg-on:#2a2a2c; --toast:#1c1c1e;
   --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
   --head:56px; --tabs:58px;
+}
+:root[data-theme="light"]{
+  color-scheme:light;
+  --bg:#f5f1e8; --card:#ffffff; --text:#1d1a14; --muted:#7a7263; --line:#e6dfd0;
+  --brand:#9c7a3c; --brand-2:#7d5f26; --in:#8a6a1f; --out:#c0392b; --chip:#f1ebdf;
+  --shadow:0 1px 2px rgba(60,45,20,.06),0 6px 18px rgba(60,45,20,.06);
+  --bar:rgba(245,241,232,.88); --seg-on:#ffffff; --toast:#2a2620;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
@@ -37,7 +46,7 @@ input,select{font:inherit;color:var(--text);font-size:16px}
 
 /* topo */
 #top{position:fixed;inset:0 0 auto 0;z-index:20;padding-top:var(--sat);
-  background:rgba(0,0,0,.82);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+  background:var(--bar);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
 #top .bar{height:var(--head);max-width:640px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 8px}
 #top .ic{width:44px;height:44px;border-radius:12px;font-size:28px;line-height:1;color:var(--brand);display:grid;place-items:center}
 #top .ic:active{background:rgba(255,255,255,.08)}
@@ -101,7 +110,7 @@ main{max-width:640px;margin:0 auto;
 .search{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);padding:0 14px;-webkit-appearance:none;appearance:none}
 .seg{display:flex;background:var(--chip);border-radius:12px;padding:3px;gap:3px}
 .seg button{flex:1;height:36px;border-radius:9px;font-weight:600;font-size:14px;color:var(--muted)}
-.seg button.on{background:#2a2a2c;color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.seg button.on{background:var(--seg-on);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.25)}
 .card,.group,.tip{border:1px solid var(--line)}
 .seg.type button.on[data-type=out]{color:var(--out)}
 .seg.type button.on[data-type=in]{color:var(--in)}
@@ -193,7 +202,7 @@ main{max-width:640px;margin:0 auto;
 #fab:active{transform:scale(.94)}
 #fab svg{width:28px;height:28px}
 #fab.hide{display:none}
-#tabs{position:fixed;inset:auto 0 0 0;z-index:15;background:rgba(0,0,0,.85);
+#tabs{position:fixed;inset:auto 0 0 0;z-index:15;background:var(--bar);
   -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding-bottom:var(--sab)}
 #tabs .in-{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);height:var(--tabs)}
 #tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;font-weight:600;color:var(--muted)}
@@ -253,7 +262,7 @@ main{max-width:640px;margin:0 auto;
 #wrapC .grab{display:none}
 
 #toast{border:1px solid rgba(201,169,110,.4);position:fixed;left:50%;bottom:calc(var(--sab) + var(--tabs) + 86px);transform:translate(-50%,20px);z-index:60;
-  background:#13201d;color:#fff;padding:10px 16px;border-radius:99px;font-size:14px;font-weight:550;opacity:0;pointer-events:none;
+  background:var(--toast);color:#fff;padding:10px 16px;border-radius:99px;font-size:14px;font-weight:550;opacity:0;pointer-events:none;
   transition:opacity .2s,transform .2s;max-width:88vw;text-align:center}
 #toast.show{opacity:1;transform:translate(-50%,0)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -851,6 +860,12 @@ function vCfg() {
     `<span class="cat">${c.emoji} ${esc(c.name)}<button data-act="delcat" data-id="${esc(c.id)}" aria-label="Remover ${esc(c.name)}">×</button></span>`).join('');
   const last = S.lastBackup ? new Date(S.lastBackup).toLocaleDateString('pt-BR') : 'nunca';
   return `
+  <section class="card"><h2>Aparência</h2>
+    <div class="seg">
+      <button data-act="theme" data-v="dark" class="${S.theme !== 'light' ? 'on' : ''}">🌙 Escuro</button>
+      <button data-act="theme" data-v="light" class="${S.theme === 'light' ? 'on' : ''}">☀️ Claro</button>
+    </div>
+  </section>
   <section class="card"><h2>Backup</h2>
     <button class="btn" data-act="exp-json">Exportar backup<small>Salva todos os dados num arquivo. Último backup: ${esc(last)}.</small></button>
     <button class="btn" data-act="imp">Importar backup<small>Restaura de um arquivo exportado (substitui os dados atuais).</small></button>
@@ -994,6 +1009,7 @@ view.addEventListener('click', (e) => {
   if (a === 'edit') { const id = el.dataset.id; openSheet(id.startsWith('r:') ? occById(id) : S.tx.find((t) => t.id === id)); }
   else if (a === 'bill') openBill(el.dataset.id);
   else if (a === 'fuel') openInv('fuel');
+  else if (a === 'theme') { S.theme = el.dataset.v; save(); applyTheme(); render(); }
   else if (a === 'pay') togglePay(el.dataset.kind, el.dataset.id, el.dataset.m);
   else if (a === 'payx') { const k = el.dataset.id + '|' + el.dataset.m; ui.payOpen = ui.payOpen === k ? null : k; render(); }
   else if (a === 'goMonth') { ui.month = el.dataset.m; ui.tab = 'sum'; render(); window.scrollTo(0, 0); }
@@ -1527,6 +1543,15 @@ async function refreshCdi(force) {
   } catch (e) { return false; }
 }
 
+// Tema: escuro é o padrão. A barra de status do iPhone segue o tema na próxima abertura do app.
+function applyTheme() {
+  const light = S.theme === 'light';
+  document.documentElement.dataset.theme = light ? 'light' : 'dark';
+  document.querySelector('meta[name="theme-color"]').content = light ? '#f5f1e8' : '#000000';
+  document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]').content = light ? 'default' : 'black-translucent';
+}
+
+applyTheme();
 render();
 refreshCdi();
 document.addEventListener('visibilitychange', () => {
