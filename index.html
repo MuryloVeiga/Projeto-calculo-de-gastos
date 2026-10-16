@@ -201,7 +201,19 @@ main{max-width:640px;margin:0 auto;
   box-shadow:0 6px 22px rgba(201,169,110,.35);display:grid;place-items:center}
 #fab:active{transform:scale(.94)}
 #fab svg{width:28px;height:28px}
-#fab.hide{display:none}
+#fab.hide,#mic.hide{display:none}
+/* microfone: menor, empilhado em cima do + */
+#mic{position:fixed;right:max(23px,calc(50% - 297px));bottom:calc(var(--sab) + var(--tabs) + 86px);z-index:15;
+  width:44px;height:44px;border-radius:50%;background:var(--card);color:var(--brand);border:1px solid rgba(201,169,110,.45);
+  box-shadow:0 4px 14px rgba(0,0,0,.35);display:grid;place-items:center}
+#mic:active{transform:scale(.94)}
+#mic svg{width:22px;height:22px}
+.vwrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin:6px 0 4px;text-align:center}
+.vmic{width:84px;height:84px;border-radius:50%;background:var(--gold);color:#14110b;display:grid;place-items:center;
+  box-shadow:0 6px 22px rgba(201,169,110,.35)}
+.vmic svg{width:38px;height:38px}
+.vmic.on{animation:vpulse 1.2s ease-in-out infinite}
+@keyframes vpulse{0%,100%{box-shadow:0 0 0 0 rgba(201,169,110,.55)}50%{box-shadow:0 0 0 16px rgba(201,169,110,0)}}
 #tabs{position:fixed;inset:auto 0 0 0;z-index:15;background:var(--bar);
   -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding-bottom:var(--sab)}
 #tabs .in-{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);height:var(--tabs)}
@@ -287,6 +299,9 @@ main{max-width:640px;margin:0 auto;
 
 <main id="view"></main>
 
+<button id="mic" aria-label="Lançar por voz">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg>
+</button>
 <button id="fab" aria-label="Novo lançamento">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
 </button>
@@ -991,6 +1006,7 @@ function render() {
   $('#top').classList.toggle('cfg', noMonth);
   $('#title').textContent = ui.tab === 'inv' ? 'Investimentos' : ui.tab === 'prev' ? 'Previsão' : 'Ajustes';
   $('#fab').classList.toggle('hide', noMonth);
+  $('#mic').classList.toggle('hide', noMonth);
   document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('on', b.dataset.tab === ui.tab));
   view.innerHTML = ui.tab === 'sum' ? vSum() : ui.tab === 'list' ? vList() : ui.tab === 'inv' ? vInv() : ui.tab === 'prev' ? vPrev() : vCfg();
 }
@@ -1003,6 +1019,7 @@ $('#prev').addEventListener('click', () => { ui.month = shiftMonth(ui.month, -1)
 $('#next').addEventListener('click', () => { ui.month = shiftMonth(ui.month, 1); render(); });
 $('#mlabel').addEventListener('click', () => { ui.month = today().slice(0, 7); render(); });
 $('#fab').addEventListener('click', () => openSheet(null));
+$('#mic').addEventListener('click', () => openInv('voice'));
 
 view.addEventListener('input', (e) => {
   if (e.target.id === 'q') { ui.q = e.target.value; $('#listBody').innerHTML = listBody(); }
@@ -1064,6 +1081,7 @@ function openWrap(w) {
 }
 function closeWrap(w) {
   if (w.id === 'wrapC' && cResolve) { endConfirm(false); return; }
+  if (w.id === 'wrap3') stopListen();
   w.classList.remove('open');
   if (!document.querySelector('.wrap.open')) document.body.classList.remove('lock');
   if (document.activeElement) document.activeElement.blur();
@@ -1113,7 +1131,7 @@ function syncFix() {
 }
 $('#fFix').addEventListener('change', syncFix);
 
-function openSheet(tx) {
+function openSheet(tx, noFocus) {
   const r = tx && tx.rule ? S.fixed.find((x) => x.id === tx.rule) : null;
   F.id = tx && !r ? tx.id : null;
   F.rule = r ? r.id : null;
@@ -1140,7 +1158,19 @@ function openSheet(tx) {
   setType(tx ? tx.type : (ui.tab === 'list' && ui.f === 'in' ? 'in' : 'out'));
   syncFix();
   openWrap(wrap);
-  if (!tx) setTimeout(() => $('#fAmount').focus(), 280);
+  if (!tx && !noFocus) setTimeout(() => $('#fAmount').focus(), 280);
+}
+// Abre o lançamento novo já preenchido com o que foi entendido da voz.
+function openPrefilled(p) {
+  openSheet(null, true);
+  setType(p.type);
+  if (p.amount) $('#fAmount').value = (p.amount / 100).toFixed(2).replace('.', ',');
+  $('#fDesc').value = p.desc || '';
+  if (p.cat) { F.cat = p.cat; renderCatChips(); }
+  $('#fDate').value = p.date;
+  $('#fCard').checked = !!p.card && p.type === 'out';
+  if (p.card) $('#fCardSel').value = p.card;
+  syncCardSel();
 }
 const closeSheet = () => closeWrap(wrap);
 document.querySelectorAll('.backdrop').forEach((b) => b.addEventListener('click', () => closeWrap(b.parentElement)));
@@ -1193,7 +1223,8 @@ $('#sheet').addEventListener('submit', (e) => {
   } else if (fix) {
     addRule(vals, date, N);
   } else {
-    S.tx.push({ id: uid(), ...vals, date, ts: Date.now() });
+    // combustível no débito já entra pago (igual ao "+ Abastecer")
+    S.tx.push({ id: uid(), ...vals, date, ts: Date.now(), ...(vals.cat === FUEL && !vals.card ? { paid: true } : {}) });
   }
   save();
   ui.month = date.slice(0, 7);
@@ -1344,7 +1375,7 @@ function setStart(v, start, initAmt) {
 
 function openInv(mode, id) {
   const v = S.inv.find((x) => x.id === id);
-  if (mode !== 'new' && mode !== 'cdi' && mode !== 'fuel' && !v) return;
+  if (mode !== 'new' && mode !== 'cdi' && mode !== 'fuel' && mode !== 'voice' && !v) return;
   I.mode = mode; I.id = id || null;
   const bal = v ? simulate(v, today()).end : 0;
   let title = '', body = '';
@@ -1372,6 +1403,13 @@ function openInv(mode, id) {
       + `<div class="evs"><div class="sub">Movimentações</div>${evs.map(({ e, i }) =>
         `<div class="ev"><span>${parseISO(e.date).toLocaleDateString('pt-BR')} · ${lbl[e.type]}</span><b class="num">${money(e.amount)}</b>
           <button type="button" data-ev="${i}" aria-label="Apagar movimentação">×</button></div>`).join('')}</div>`;
+  } else if (mode === 'voice') {
+    title = '🎤 Lançar por voz';
+    body = `<div class="vwrap"><button type="button" id="vMic" class="vmic" aria-label="Ouvir">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg></button>
+        <p class="note" id="vStatus">Toque no microfone e fale.</p></div>`
+      + txtField('vText', 'O que entendi (dá para corrigir ou digitar)', '', 'placeholder="ex.: gastei 50 no mercado no Santander"')
+      + `<p class="note" style="margin-top:8px">Exemplos: “gastei 80 reais de pizza no crédito”, “mercado 230 no Santander ontem”, “recebi 500 de freela”.</p>`;
   } else if (mode === 'fuel') {
     title = '⛽ Abastecimento';
     body = amtField('iAmt', 'Quanto abasteceu') + txtField('iDate', 'Data', today(), 'type="date"')
@@ -1386,7 +1424,15 @@ function openInv(mode, id) {
   $('#iTitle').textContent = title;
   $('#iBody').innerHTML = body;
   $('#iDel').hidden = mode !== 'cfg';
+  $('#sheet3 .pbtn').textContent = mode === 'voice' ? 'Continuar' : 'Salvar';
   openWrap(wrap3);
+  if (mode === 'voice') {
+    $('#vMic').addEventListener('click', () => {
+      if (listening) { stopListen(); setListenUI(false, 'Toque no microfone e fale.'); } else startListen();
+    });
+    setTimeout(startListen, 300);
+    return;
+  }
   const first = $('#iBody input');
   if (first && mode !== 'cfg') setTimeout(() => first.focus(), 280);
 }
@@ -1451,6 +1497,14 @@ $('#sheet3').addEventListener('submit', (e) => {
       if (!setStart(v, start, initAmt)) return;
       if (cal) v.eff = keep; // o valor do dia digitado tem prioridade
     }
+  } else if (I.mode === 'voice') {
+    const text = $('#vText').value.trim();
+    if (!text) { toast('Fale ou digite o lançamento'); return; }
+    const p = parseVoice(text);
+    closeWrap(wrap3);
+    setTimeout(() => openPrefilled(p), 150);
+    if (!p.amount) toast('Não peguei o valor: digite no campo');
+    return;
   } else if (I.mode === 'fuel') {
     if (!amt) { toast('Digite quanto abasteceu'); return; }
     const date = $('#iDate').value || today();
@@ -1548,6 +1602,120 @@ async function refreshCdi(force) {
     if (ui.tab === 'inv') render();
     return true;
   } catch (e) { return false; }
+}
+
+/* ---------- lançar por voz ----------
+   Usa o reconhecimento de voz do navegador (no iPhone, o ditado da Apple). Se não houver ou for bloqueado,
+   o campo de texto aceita o ditado do teclado. A frase é interpretada aqui mesmo, sem internet de IA. */
+const norm = (s) => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+const VOICE_KEYS = {
+  out: [
+    [/\b(supermercado|mercado|feira|atacadao|assai|hortifruti)\b/, 'mercado'],
+    [/\b(gasolina|etanol|alcool|combustivel|abasteci|abastecimento|posto)\b/, 'combustivel'],
+    [/\b(ifood|pizza|lanche|hamburguer|restaurante|almoco|jantar|cafe|padaria|acai|sorvete|marmita)\b/, 'restaurantes'],
+    [/\b(uber|onibus|metro|estacionamento|pedagio|oficina|mecanico|lava jato|pneu)\b/, 'transporte'],
+    [/\b(farmacia|remedio|medico|consulta|exame|dentista|hospital)\b/, 'saude'],
+    [/\b(cinema|bar|show|jogo|balada|viagem|passeio)\b/, 'lazer'],
+    [/\b(luz|energia|agua|internet|telefone|celular|gas)\b/, 'contas'],
+    [/\b(roupa|tenis|loja|shopee|amazon|shein|presente|mercado livre)\b/, 'compras'],
+    [/\b(aluguel|condominio|iptu|movel|moveis)\b/, 'moradia'],
+  ],
+  in: [
+    [/\b(salario)\b/, 'salario'],
+    [/\b(freela|extra|bico|venda|vendi)\b/, 'extra'],
+  ],
+};
+function parseVoice(raw) {
+  let t = ' ' + norm(raw) + ' ';
+  const p = { type: 'out', amount: 0, cat: null, card: null, date: today(), desc: '' };
+  // data ("ontem", "anteontem", "dia 5") — sai do texto antes de procurar o valor
+  const d0 = new Date();
+  if (/\banteontem\b/.test(t)) { d0.setDate(d0.getDate() - 2); p.date = iso(d0); }
+  else if (/\bontem\b/.test(t)) { d0.setDate(d0.getDate() - 1); p.date = iso(d0); }
+  const dm = t.match(/\bdia (\d{1,2})\b/);
+  if (dm) {
+    const day = +dm[1], cm = today().slice(0, 7), dim = new Date(+cm.slice(0, 4), +cm.slice(5, 7), 0).getDate();
+    if (day >= 1) p.date = `${cm}-${pad(Math.min(day, dim))}`;
+    t = t.replace(dm[0], ' ');
+  }
+  // valor: "80", "80,50", "1.500", "R$ 80", "80 reais e 50 centavos"
+  const m = t.match(/(\d{1,3}(?:\.\d{3})+|\d+)(?:,(\d{1,2})|\.(\d{1,2})(?!\d))?/);
+  if (m) {
+    const cents = m[2] || m[3];
+    p.amount = parseInt(m[1].replace(/\./g, ''), 10) * 100 + (cents ? parseInt(cents.padEnd(2, '0'), 10) : 0);
+    const c = t.slice(m.index + m[0].length).match(/^\s*(?:reais|real|conto)?\s*e\s*(\d{1,2})\s*centavos?/);
+    if (c && !cents) p.amount += parseInt(c[1], 10);
+  }
+  // receita ou despesa
+  if (/\b(recebi|ganhei|entrou|caiu|vendi|salario|freela)\b/.test(t)) p.type = 'in';
+  // cartão: pelo nome; "crédito"/"cartão" sem nome = primeiro cartão; débito/pix/dinheiro = sem cartão
+  if (p.type === 'out') {
+    // o nome do cartão sai do texto ("Mercado Pago" não pode virar a categoria Mercado)
+    for (const c of S.cards) if (t.includes(norm(c.name))) { p.card = c.id; t = t.split(norm(c.name)).join(' '); }
+    if (!p.card && /\b(credito|cartao)\b/.test(t) && S.cards.length) p.card = S.cards[0].id;
+    if (/\b(debito|pix|dinheiro)\b/.test(t)) p.card = null;
+  }
+  // categoria: pelo nome das suas categorias, senão por palavra-chave
+  const cats = S.cats.filter((c) => c.type === p.type);
+  for (const c of cats) if (new RegExp('\\b' + norm(c.name).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b').test(t)) { p.cat = c.id; break; }
+  for (const [re, id] of VOICE_KEYS[p.type]) {
+    const k = t.match(re);
+    if (k) { if (!p.cat && cats.some((c) => c.id === id)) p.cat = id; if (!p.desc) p.desc = voiceDesc(raw, k[0].trim()); break; }
+  }
+  return p;
+}
+// Descrição com a palavra como foi falada (com acento): "farmácia" → "Farmácia".
+const VOICE_DESC = { abasteci: 'Abastecimento', vendi: 'Venda', movel: 'Móveis' };
+function voiceDesc(raw, key) {
+  if (VOICE_DESC[key]) return VOICE_DESC[key];
+  const n = key.split(' ').length;
+  const words = String(raw).split(/\s+/);
+  for (let i = 0; i + n <= words.length; i++) {
+    const chunk = words.slice(i, i + n).join(' ');
+    if (norm(chunk).replace(/[^\w ]/g, '') === key) return cap(chunk.replace(/[^\p{L}\p{N} ]/gu, ''));
+  }
+  return cap(key);
+}
+
+let rec = null, listening = false;
+function setListenUI(on, msg) {
+  listening = on;
+  const b = $('#vMic'), s = $('#vStatus');
+  if (b) b.classList.toggle('on', on);
+  if (s && msg) s.textContent = msg;
+}
+function startListen() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { setListenUI(false, 'Este navegador não ouve por aqui: toque no campo abaixo e use o 🎤 do teclado.'); return; }
+  stopListen();
+  let finalText = '';
+  try {
+    rec = new SR();
+    rec.lang = 'pt-BR'; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 1;
+    rec.onresult = (e) => {
+      const txt = Array.from(e.results).map((r) => r[0].transcript).join(' ').trim();
+      if ($('#vText')) $('#vText').value = txt;
+      if (e.results[e.results.length - 1].isFinal) finalText = txt;
+    };
+    rec.onerror = (e) => {
+      const blocked = e.error === 'not-allowed' || e.error === 'service-not-allowed';
+      setListenUI(false, blocked ? 'O iPhone bloqueou a voz aqui: toque no campo abaixo e use o 🎤 do teclado.'
+        : e.error === 'no-speech' ? 'Não ouvi nada. Toque no microfone e tente de novo.' : 'Não consegui ouvir. Tente de novo ou digite.');
+    };
+    rec.onend = () => {
+      rec = null;
+      if (finalText && !wrap3.hidden) { setListenUI(false, 'Entendi!'); $('#sheet3').requestSubmit(); }
+      else if (listening) setListenUI(false, 'Toque no microfone e fale.');
+    };
+    rec.start();
+    setListenUI(true, 'Ouvindo… pode falar.');
+  } catch (err) {
+    setListenUI(false, 'Não consegui ligar o microfone: use o 🎤 do teclado no campo abaixo.');
+  }
+}
+function stopListen() {
+  if (rec) { try { rec.abort(); } catch (e) {} rec = null; }
+  listening = false;
 }
 
 /* ---------- fechar janelas: botão ✕ e arrastar para baixo ---------- */
