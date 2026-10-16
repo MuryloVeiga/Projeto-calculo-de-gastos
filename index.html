@@ -896,6 +896,7 @@ function vCfg() {
   <section class="card"><h2>Seus dados</h2>
     <p class="note">${S.tx.length} lançamentos guardados ${memoryOnly ? '<b>(só na memória — este navegador não está salvando!)</b>' : 'somente neste aparelho'}. Nada é enviado para a internet. Se você limpar os dados do Safari ou apagar o app, eles somem — por isso faça backup de vez em quando.</p>
     <button class="btn danger" data-act="wipe" style="margin-top:8px">Apagar todos os dados</button>
+    <p class="note" style="margin-top:10px;text-align:center">Versão do app: <b>${ui.appVersion || '—'}</b></p>
   </section>`;
 }
 
@@ -1593,8 +1594,25 @@ document.addEventListener('visibilitychange', () => {
   render();
   refreshCdi();
 });
+// Atualização: procura versão nova ao abrir e ao voltar para o app; quando o service worker
+// novo assume, recarrega sozinho uma vez (não precisa abrir duas vezes).
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController || reloaded || !wrap.hidden) return; // não recarrega no meio de um lançamento
+    reloaded = true;
+    location.reload();
+  });
+  navigator.serviceWorker.addEventListener('message', (e) => {
+    if (e.data && e.data.version) { ui.appVersion = e.data.version; if (ui.tab === 'cfg') render(); }
+  });
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((reg) => {
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reg.update().catch(() => {}); });
+    }).catch(() => {});
+    navigator.serviceWorker.ready.then((reg) => reg.active && reg.active.postMessage('version'));
+  });
 }
 })();
 </script>
