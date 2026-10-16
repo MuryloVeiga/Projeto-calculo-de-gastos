@@ -896,6 +896,7 @@ function vCfg() {
   <section class="card"><h2>Seus dados</h2>
     <p class="note">${S.tx.length} lançamentos guardados ${memoryOnly ? '<b>(só na memória — este navegador não está salvando!)</b>' : 'somente neste aparelho'}. Nada é enviado para a internet. Se você limpar os dados do Safari ou apagar o app, eles somem — por isso faça backup de vez em quando.</p>
     <button class="btn danger" data-act="wipe" style="margin-top:8px">Apagar todos os dados</button>
+    <button class="btn" data-act="update" style="margin-top:4px">🔄 Buscar atualização<small>Baixa a versão mais nova do app. Seus dados não são apagados.</small></button>
     <p class="note" style="margin-top:10px;text-align:center">Versão do app: <b>${ui.appVersion || '—'}</b></p>
   </section>`;
 }
@@ -1014,6 +1015,7 @@ view.addEventListener('click', (e) => {
   if (a === 'edit') { const id = el.dataset.id; openSheet(id.startsWith('r:') ? occById(id) : S.tx.find((t) => t.id === id)); }
   else if (a === 'bill') openBill(el.dataset.id);
   else if (a === 'fuel') openInv('fuel');
+  else if (a === 'update') forceUpdate();
   else if (a === 'theme') { S.theme = el.dataset.v; save(); applyTheme(); render(); }
   else if (a === 'pay') togglePay(el.dataset.kind, el.dataset.id, el.dataset.m);
   else if (a === 'payx') { const k = el.dataset.id + '|' + el.dataset.m; ui.payOpen = ui.payOpen === k ? null : k; render(); }
@@ -1594,6 +1596,22 @@ document.addEventListener('visibilitychange', () => {
   render();
   refreshCdi();
 });
+// Botão "Buscar atualização": só com internet (sem ela, apagar o cache deixaria o app sem abrir offline).
+// Apaga a cópia do código guardada (os dados ficam no localStorage, não são tocados) e recarrega.
+async function forceUpdate() {
+  toast('Buscando atualização…');
+  try {
+    const r = await fetch('sw.js?check=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) throw new Error('offline');
+  } catch (e) { toast('Sem internet: tente de novo quando estiver conectado'); return; }
+  try {
+    const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration();
+    if (reg) await reg.update();
+    for (const k of await caches.keys()) await caches.delete(k);
+  } catch (e) { /* segue para recarregar mesmo assim */ }
+  location.reload();
+}
+
 // Atualização: procura versão nova ao abrir e ao voltar para o app; quando o service worker
 // novo assume, recarrega sozinho uma vez (não precisa abrir duas vezes).
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
