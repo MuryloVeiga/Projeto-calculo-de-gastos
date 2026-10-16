@@ -19,7 +19,7 @@
 :root{
   color-scheme:dark;
   --bg:#000000; --card:#0f0f10; --text:#f1ede4; --muted:#8b877e; --line:#242325;
-  --brand:#c9a96e; --brand-2:#e9d5a6; --in:#dcc28a; --out:#ff7a70; --chip:#1a1a1b;
+  --brand:#c9a96e; --brand-2:#e9d5a6; --in:#4ade80; --out:#ff7a70; --chip:#1a1a1b;
   --gold:linear-gradient(135deg,#f3e2b3 0%,#c9a96e 45%,#9a7a45 100%);
   --shadow:0 0 0 1px rgba(255,255,255,.05);
   --bar:rgba(0,0,0,.84); --seg-on:#2a2a2c; --toast:#1c1c1e;
@@ -29,7 +29,7 @@
 :root[data-theme="light"]{
   color-scheme:light;
   --bg:#f5f1e8; --card:#ffffff; --text:#1d1a14; --muted:#7a7263; --line:#e6dfd0;
-  --brand:#9c7a3c; --brand-2:#7d5f26; --in:#8a6a1f; --out:#c0392b; --chip:#f1ebdf;
+  --brand:#9c7a3c; --brand-2:#7d5f26; --in:#16a34a; --out:#c0392b; --chip:#f1ebdf;
   --shadow:0 1px 2px rgba(60,45,20,.06),0 6px 18px rgba(60,45,20,.06);
   --bar:rgba(245,241,232,.88); --seg-on:#ffffff; --toast:#2a2620;
 }
@@ -68,6 +68,7 @@ main{max-width:640px;margin:0 auto;
 .s-lbl{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--brand)}
 .s-big{font-size:40px;font-weight:650;letter-spacing:-.5px;font-variant-numeric:tabular-nums;margin:4px 0 16px}
 .s-big.neg{color:var(--out)}
+.s-big.pos{color:var(--in)}
 .s-row{display:grid;grid-template-columns:repeat(3,auto);justify-content:space-between;gap:8px}
 .s-row small{display:block;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
 .s-row b{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -172,6 +173,49 @@ main{max-width:640px;margin:0 auto;
 
 .frow{display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;padding:10px 0;border-top:1px solid var(--line);font-size:14px;text-transform:capitalize}
 .frow b{font-variant-numeric:tabular-nums;color:var(--out);font-weight:600}
+
+/* previsão: gráfico de linha arrastável */
+.pchart{overflow-x:auto;margin:0 -16px;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x mandatory}
+.pchart::-webkit-scrollbar{display:none}
+.ptrack{display:flex;width:max-content}
+.psp{flex:none}
+.pin{position:relative;flex:none}
+.ptabs button{scroll-snap-align:center}
+.psvg{display:block}
+.parea{fill:rgba(201,169,110,.14)}
+.pline{fill:none;stroke:var(--brand);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pv{stroke:rgba(201,169,110,.25);stroke-width:1}
+.pzero{stroke:var(--out);stroke-width:1;stroke-dasharray:4 4;opacity:.5}
+.pdot{fill:var(--brand)}
+.pdot.neg{fill:var(--out)}
+.pdot.pos{fill:var(--in)}
+.plbl{position:absolute;transform:translate(-50%,-100%);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 9px;
+  font-size:12.5px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.plbl::after{content:"";position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);border:6px solid transparent;border-top-color:var(--card);border-bottom:0}
+.plbl.sel{font-size:16px;font-weight:750;color:var(--text);padding:7px 13px;z-index:2;border-color:rgba(201,169,110,.5)}
+.plbl.neg{color:var(--out)}
+.plbl.pos{color:var(--in)}
+.ptit{position:absolute;transform:translate(-50%,-100%);font-size:12px;color:var(--muted);white-space:nowrap}
+.phit{position:absolute;width:40px;height:40px;transform:translate(-50%,-50%);border-radius:50%}
+.ptabs{display:flex;border-bottom:1px solid var(--line)}
+.ptabs button{flex:none;padding:12px 0 10px;font-size:14px;color:var(--muted);border-bottom:3px solid transparent}
+.ptabs button.on{color:var(--brand);border-bottom-color:var(--brand);font-weight:650}
+.psum>div{display:flex;justify-content:space-between;gap:10px;padding:7px 0;font-size:15px}
+.psum b{font-variant-numeric:tabular-nums}
+.psum .tot{border-top:1px solid var(--line);margin-top:4px;padding-top:10px;font-size:17px;font-weight:700}
+.psum .sub2{font-size:13px;color:var(--muted)}
+.psum .sub2 b{color:var(--text);font-weight:600}
+.psum .sub2 b.in{color:var(--in)}
+.psum .sub2 b.out{color:var(--out)}
+.xrow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:9px 0;border-top:1px solid var(--line)}
+.xrow .tx{flex:1;min-width:0;display:flex;flex-direction:column}
+.xrow .tx b{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.xrow .tx small{color:var(--muted);font-size:12px}
+.xrow .em{width:34px;height:34px;font-size:17px}
+.xrow .am{font-weight:650;font-variant-numeric:tabular-nums;white-space:nowrap;font-size:14px}
+.xcard{margin:6px 0;padding:4px 12px;border-radius:12px;background:var(--chip)}
+.xcard .xch{display:flex;justify-content:space-between;padding:8px 0;font-weight:650;font-size:14px}
+.xcard .xrow .em{background:transparent!important}
 
 /* contas do mês */
 .paysum{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:6px}
@@ -991,15 +1035,133 @@ function vPrev() {
   if (!rows.some((d) => d.i || d.o)) {
     return `<div class="empty"><big>📅</big>Nada previsto ainda.<br>Lance gastos e receitas fixos (📌) para ver a previsão dos próximos meses.</div>`;
   }
-  return `<p class="note" style="margin:0 0 14px">Considera que tudo será pago. Toque num mês para abrir o resumo dele.</p>
-    <section class="card">${rows.map((d) => {
-      const bal = d.i - d.o - d.inv;
-      return `<button class="bill" data-act="goMonth" data-m="${d.m}">
-        <div class="bh"><span>${esc(monthLabel(d.m))}${d.m === cur ? ' <span class="note">(este mês)</span>' : ''}</span><b class="${neg0(bal)}">${bal >= 0 ? '+' : ''}${money(bal)}</b></div>
-        <div class="bs"><span>Receitas <b class="in">${money(d.i)}</b> · Despesas <b class="out">${money(d.o)}</b>${d.nFix ? ` · ${d.nFix} fixo${d.nFix > 1 ? 's' : ''}` : ''}</span></div>
-        <div class="bs"><span>Saldo em conta no fim do mês</span><b class="${neg0(d.conta)}">${money(d.conta)}</b></div></button>`;
-    }).join('')}</section>`;
+  if (!rows.some((d) => d.m === ui.prevSel)) ui.prevSel = cur;
+  const sel = rows.find((d) => d.m === ui.prevSel);
+
+  // Gráfico de linha: um ponto por mês com quanto sobra (receitas − despesas − aplicações).
+  const COL = PCOL, H = 210, padT = 64, padB = 18, W = COL * rows.length;
+  const vals = rows.map((d) => d.i - d.o - d.inv);
+  let vmin = Math.min(0, ...vals), vmax = Math.max(0, ...vals);
+  if (vmax === vmin) vmax = vmin + 100;
+  const X = (i) => COL * i + COL / 2;
+  const Y = (v) => padT + (vmax - v) / (vmax - vmin) * (H - padT - padB);
+  const pts = rows.map((d, i) => [X(i), Y(vals[i])]);
+  const line = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  const area = `${line} L ${pts[pts.length - 1][0]} ${H} L ${pts[0][0]} ${H} Z`;
+  const zero = vmin < 0 ? `<line x1="0" x2="${W}" y1="${Y(0)}" y2="${Y(0)}" class="pzero"/>` : '';
+  const signed = (v) => (v < 0 ? '−' : '+') + money(Math.abs(v));
+  const shortMonth = (m) => {
+    const [y, mm] = m.split('-').map(Number);
+    const n = cap(new Date(y, mm - 1, 1).toLocaleDateString('pt-BR', { month: 'long' }));
+    return y !== +cur.slice(0, 4) ? `${n} ${String(y).slice(2)}` : n;
+  };
+  const selIdx = rows.findIndex((d) => d.m === ui.prevSel);
+  const chart = `<div class="pchart" id="pchart"><div class="ptrack"><div class="psp"></div><div class="pin" style="width:${W}px">
+    <svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" class="psvg">
+      <path d="${area}" class="parea"/>${zero}
+      ${pts.map((p, i) => `<line x1="${p[0]}" x2="${p[0]}" y1="${p[1]}" y2="${H}" class="pv"/>`).join('')}
+      <path d="${line}" class="pline"/>
+      ${pts.map((p, i) => `<circle cx="${p[0]}" cy="${p[1]}" r="${rows[i].m === ui.prevSel ? 7 : 5.5}" class="pdot ${vals[i] < 0 ? 'neg' : ''}" data-m="${rows[i].m}"/>`).join('')}
+    </svg>
+    <div class="ptit" id="ptit" style="left:${pts[selIdx][0]}px;top:${pts[selIdx][1] - 54}px">Vai sobrar</div>
+    ${rows.map((d, i) => {
+      const s = d.m === ui.prevSel;
+      return `<button class="plbl ${s ? 'sel' : ''} ${vals[i] < 0 ? 'neg' : ''}" data-act="psel" data-m="${d.m}" style="left:${pts[i][0]}px;top:${pts[i][1] - 12}px">${signed(vals[i])}</button>
+        <button class="phit" data-act="psel" data-m="${d.m}" style="left:${pts[i][0]}px;top:${pts[i][1]}px" aria-label="${esc(monthLabel(d.m))}"></button>`;
+    }).join('')}
+    <div class="ptabs">${rows.map((d) => `<button data-act="psel" data-m="${d.m}" class="${d.m === ui.prevSel ? 'on' : ''}" style="width:${COL}px">${esc(shortMonth(d.m))}</button>`).join('')}</div>
+  </div><div class="psp"></div></div></div>`;
+
+  return `<p class="note" style="margin:0 0 6px">Quanto vai sobrar em cada mês (considera que tudo será pago). Arraste para os lados e toque num mês.</p>
+    ${chart}${prevDetail(sel)}`;
 }
+
+// Extrato do mês escolhido no gráfico: o que entra, o que sai e quanto sobra.
+function prevDetail(d) {
+  const m = d.m, list = monthTx(m);
+  const bal = d.i - d.o - d.inv;
+  const dd = (s) => parseISO(s).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  const row = (t, sign) => {
+    const c = catOf(t.cat);
+    return `<button class="xrow" data-act="edit" data-id="${esc(t.id)}"><span class="em" style="background:${c.color}2b">${c.emoji}</span>
+      <span class="tx"><b>${esc(t.desc || c.name)}</b><small>${dd(t.date)} · ${esc(c.name)}${t.rule ? ' · 📌' : ''}</small></span>
+      <span class="am ${sign === '+' ? 'in' : 'out'}">${sign} ${money(t.amount)}</span></button>`;
+  };
+  const byDate = (a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+  const ins = list.filter((t) => t.type === 'in').sort(byDate);
+  const outs = list.filter((t) => t.type === 'out' && !cardOf(t.card)).sort(byDate);
+  const cardsHtml = S.cards.map((c) => {
+    const x = cardInfo(c.id, m);
+    const linked = list.filter((t) => t.type === 'out' && t.card === c.id).sort(byDate);
+    const total = x.bill != null ? Math.max(x.bill, x.linked) : x.linked;
+    if (!total) return '';
+    return `<div class="xcard"><div class="xch"><span>💳 Fatura ${esc(c.name)}</span><b class="out">− ${money(total)}</b></div>
+      ${linked.map((t) => row(t, '−')).join('')}
+      ${x.extra ? `<div class="xrow"><span class="em">💳</span><span class="tx"><b>Outros gastos no cartão</b><small>fatura − vinculados</small></span><span class="am out">− ${money(x.extra)}</span></div>` : ''}</div>`;
+  }).join('');
+  return `<section class="card" id="pdet" style="margin-top:14px">
+    <div class="ih"><span>${esc(monthLabel(m))}</span><button class="lnk" data-act="goMonth" data-m="${m}">Abrir no Resumo ›</button></div>
+    <div class="psum">
+      <div><span>+ Vai receber</span><b class="in">${money(d.i)}</b></div>
+      <div><span>− Vai pagar</span><b class="out">${money(d.o)}</b></div>
+      ${d.inv ? `<div><span>${d.inv > 0 ? '− Para investimentos' : '+ Resgates'}</span><b>${money(Math.abs(d.inv))}</b></div>` : ''}
+      <div class="tot"><span>= Vai sobrar</span><b class="${neg0(bal)}">${signedMoney(bal)}</b></div>
+      <div class="sub2"><span>Saldo em conta no fim do mês</span><b class="${neg0(d.conta)}">${money(d.conta)}</b></div>
+    </div>
+    ${ins.length ? `<div class="sub">Entradas</div>${ins.map((t) => row(t, '+')).join('')}` : ''}
+    ${outs.length || cardsHtml ? `<div class="sub">Saídas</div>${outs.map((t) => row(t, '−')).join('')}${cardsHtml}` : ''}
+    ${!ins.length && !outs.length && !cardsHtml ? '<p class="note">Nada lançado para este mês.</p>' : ''}
+  </section>`;
+}
+const signedMoney = (v) => (v < 0 ? '−' : '+') + money(Math.abs(v));
+const PCOL = 110; // largura de cada mês no gráfico da previsão
+const prevRow = (m) => ({ m, ...monthTotals(m), conta: contaPrevista(m) });
+// Troca o mês selecionado sem redesenhar o gráfico (para não atrapalhar o arraste).
+function selectPrev(m) {
+  if (!m || ui.prevSel === m) return;
+  ui.prevSel = m;
+  document.querySelectorAll('#pchart .plbl').forEach((b) => b.classList.toggle('sel', b.dataset.m === m));
+  document.querySelectorAll('#pchart .ptabs button').forEach((b) => b.classList.toggle('on', b.dataset.m === m));
+  document.querySelectorAll('#pchart .pdot').forEach((c) => c.setAttribute('r', c.dataset.m === m ? 7 : 5.5));
+  const lb = document.querySelector(`#pchart .plbl[data-m="${m}"]`), tit = $('#ptit');
+  if (lb && tit) { tit.style.left = lb.style.left; tit.style.top = (parseFloat(lb.style.top) - 42) + 'px'; }
+  const det = $('#pdet');
+  if (det) det.outerHTML = prevDetail(prevRow(m));
+}
+// Leva o gráfico até o mês (cada mês fica no centro quando scrollLeft = índice × largura).
+function scrollPrevTo(m, smooth) {
+  const pc = $('#pchart');
+  if (!pc) return;
+  const tabs = [...pc.querySelectorAll('.ptabs button')];
+  const i = tabs.findIndex((b) => b.dataset.m === m);
+  if (i >= 0) pc.scrollTo({ left: i * PCOL, behavior: smooth ? 'smooth' : 'auto' });
+}
+function setupPrevChart(oldScroll) {
+  const pc = $('#pchart');
+  if (!pc) return;
+  const sp = Math.max(0, (pc.clientWidth - PCOL) / 2);
+  pc.querySelectorAll('.psp').forEach((s) => { s.style.width = sp + 'px'; });
+  if (oldScroll != null) { pc.scrollLeft = oldScroll; scrollPrevTo(ui.prevSel, true); } else scrollPrevTo(ui.prevSel, false);
+  const tabs = pc.querySelectorAll('.ptabs button');
+  pc.addEventListener('scroll', () => {
+    const i = Math.max(0, Math.min(tabs.length - 1, Math.round(pc.scrollLeft / PCOL)));
+    selectPrev(tabs[i].dataset.m);
+  }, { passive: true });
+}
+// Arrastar o extrato (embaixo do gráfico) para o lado também troca de mês.
+let pSwipe = null;
+view.addEventListener('touchstart', (e) => {
+  pSwipe = e.target.closest('#pdet') && e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : null;
+}, { passive: true });
+view.addEventListener('touchend', (e) => {
+  if (!pSwipe) return;
+  const t = e.changedTouches[0], dx = t.clientX - pSwipe.x, dy = t.clientY - pSwipe.y;
+  pSwipe = null;
+  if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+  const tabs = [...document.querySelectorAll('#pchart .ptabs button')];
+  const i = tabs.findIndex((b) => b.dataset.m === ui.prevSel) + (dx < 0 ? 1 : -1);
+  if (tabs[i]) { scrollPrevTo(tabs[i].dataset.m, true); selectPrev(tabs[i].dataset.m); }
+}, { passive: true });
 const neg0 = (n) => (n < 0 ? 'out' : '');
 
 function render() {
@@ -1010,7 +1172,10 @@ function render() {
   $('#fab').classList.toggle('hide', noMonth);
   $('#mic').classList.toggle('hide', noMonth || !VOICE_ON);
   document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('on', b.dataset.tab === ui.tab));
+  const oldPc = $('#pchart'), oldScroll = oldPc ? oldPc.scrollLeft : null;
   view.innerHTML = ui.tab === 'sum' ? vSum() : ui.tab === 'list' ? vList() : ui.tab === 'inv' ? vInv() : ui.tab === 'prev' ? vPrev() : vCfg();
+  // Previsão: centraliza o mês escolhido e liga o arraste.
+  setupPrevChart(oldScroll);
 }
 
 /* ---------- eventos da tela ---------- */
@@ -1034,6 +1199,7 @@ view.addEventListener('click', (e) => {
   if (a === 'edit') { const id = el.dataset.id; openSheet(id.startsWith('r:') ? occById(id) : S.tx.find((t) => t.id === id)); }
   else if (a === 'bill') openBill(el.dataset.id);
   else if (a === 'fuel') openInv('fuel');
+  else if (a === 'psel') { scrollPrevTo(el.dataset.m, true); selectPrev(el.dataset.m); }
   else if (a === 'update') forceUpdate();
   else if (a === 'theme') { S.theme = el.dataset.v; save(); applyTheme(); render(); }
   else if (a === 'pay') togglePay(el.dataset.kind, el.dataset.id, el.dataset.m);

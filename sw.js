@@ -2,7 +2,7 @@
 // O GitHub Pages manda guardar os arquivos por 10 min (max-age=600); por isso toda busca aqui
 // ignora o cache HTTP do navegador ('no-store'/'reload'), senão o iPhone recebia a versão velha.
 // Ao mudar o app, aumente VERSION: 2.2 → 2.3 → 2.4... (também aparece em Ajustes).
-const VERSION = '2.6';
+const VERSION = '2.7';
 const CACHE = 'financas-v' + VERSION;
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 
