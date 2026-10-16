@@ -1008,7 +1008,7 @@ function render() {
   $('#top').classList.toggle('cfg', noMonth);
   $('#title').textContent = ui.tab === 'inv' ? 'Investimentos' : ui.tab === 'prev' ? 'Previsão' : 'Ajustes';
   $('#fab').classList.toggle('hide', noMonth);
-  $('#mic').classList.toggle('hide', noMonth);
+  $('#mic').classList.toggle('hide', noMonth || !VOICE_ON);
   document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('on', b.dataset.tab === ui.tab));
   view.innerHTML = ui.tab === 'sum' ? vSum() : ui.tab === 'list' ? vList() : ui.tab === 'inv' ? vInv() : ui.tab === 'prev' ? vPrev() : vCfg();
 }
@@ -1692,6 +1692,9 @@ function setListenUI(on, msg) {
 // Por isso: modo contínuo no iOS, para sozinho 1,5 s depois da última palavra, e se em 6 s não vier
 // nada, desiste e pede para usar o ditado do teclado (que sempre funciona). A linha pequena mostra os
 // eventos do microfone para diagnóstico.
+// Botão de voz escondido por enquanto (no iPhone a voz só funciona uma vez por abertura do app).
+// Para voltar a mostrar: VOICE_ON = true.
+const VOICE_ON = false;
 let listenTimers = [], voiceRec = null, voiceUsed = false;
 // No iPhone a voz costuma funcionar só uma vez por abertura do app. Depois do 1º uso, tocar no 🎤
 // recarrega o app (os dados ficam) e já reabre a janela de voz ouvindo.
