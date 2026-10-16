@@ -2078,6 +2078,120 @@ const DUCK_GRANDE = [
   'Eu vi. Preferia não ter visto.', '{v}?! Me segura que eu vou desmaiar.', 'Gasto grande, hein. Tem certeza que cabe?',
   '{v} de uma vez. Vou precisar de um minuto.', 'Uau. Isso aí doeu até em mim.',
 ];
+// Piadas pelo assunto do lançamento: primeiro pela descrição (palavras), depois pela categoria.
+// {v} valor, {d} descrição, {c} categoria, {dia} dia do mês, {n} quantas vezes no mês. caro: valor (centavos) a partir do qual usa as falas de "caro".
+const DUCK_TEMAS = [
+  { re: /\b(oficina|mecanic\w*|conserto|consertar|pneu\w*|borracharia|alinhamento|balanceamento|revisao|bateria|freio\w*|embreagem|guincho|funilaria|amortecedor\w*|radiador|motor)\b/, pose: 'cobre', lines: [
+    'Esse carro velho quebrou de novo?', '{v} na oficina. O mecânico já te chama pelo nome?', 'Já pensou em vender esse carro e comprar uma bicicleta?',
+    'Carro é igual filho: só dá despesa e não te agradece.', '{d}? Esse carro tá te cobrando aluguel pra andar nele.', 'O mecânico vai trocar de carro. Com o teu dinheiro.'] },
+  { re: /\b(multa|ipva|licenciamento|detran)\b/, pose: 'bracos', lines: [
+    'Multa? Corre devagar, piloto de Fórmula 1.', '{d} de {v}. O governo agradece a doação.', 'Pagar pra ter carro, pagar pra andar e pagar quando anda errado. Que vida.'] },
+  { re: /\b(uber|99|taxi|99pop)\b/, pose: 'aponta', lines: [
+    'Uber de novo? Tem perna pra quê?', '{v} de Uber. A caminhada é de graça, sabia?', '{n}ª corrida no mês. O motorista já sabe teu endereço de cor.'] },
+  { re: /\b(estacionamento|pedagio|zona azul|valet)\b/, pose: 'oculos', lines: [
+    '{v} só pra deixar o carro parado. Que luxo.', 'Pagando pro carro descansar. Ele trabalha menos que você.'] },
+  { re: /\b(netflix|spotify|disney\+?|disney plus|prime video|amazon prime|hbo|max|globoplay|youtube premium|deezer|apple tv|apple music|paramount|crunchyroll|star\+?|streaming)\b/, pose: 'bracos', tipo: 'stream', lines: [
+    'Você já não paga {outro}? Agora mais essa?', 'Quantos streamings dá pra assistir ao mesmo tempo? Pergunta séria.',
+    '{d} de novo. Pelo menos você usa?', 'Mais uma assinatura. Daqui a pouco abre uma locadora.', 'Você passa mais tempo escolhendo o filme do que assistindo.'] },
+  { re: /\b(lanche\w*|hamburguer\w*|burger\w*|x-?(?:burguer|burger|salada|tudo|bacon|egg|frango)|mc ?donald\w*|mequi|bk|burger king|hot ?dog|cachorro quente|pastel|coxinha|salgado\w*|esfiha\w*|habib\w*|subway)\b/, pose: 'oculos', caro: 4000, lines: [
+    'Lanchinho, é? Eu vi.', 'Lanche de {v}. Tá bom, o estômago agradece. O bolso não.', 'Comendo na rua de novo? A geladeira tá de enfeite?'],
+    caras: ['Lanche de {v}?! Era banhado a ouro?', '{v} num lanche. Com isso eu comia pão o mês inteiro.', 'Um lanche de {v}. Vinha com a lanchonete junto?', '{v}? Espero que tenha vindo com batata e um abraço.'] },
+  { re: /\b(ifood|rappi|delivery|ze delivery)\b/, pose: 'aponta', lines: [
+    'iFood de novo? A cozinha tá de enfeite?', '{n}º pedido no mês. O motoboy já é da família.', 'A taxa de entrega podia ser um pacote de arroz.', 'Delivery de {v}. Fogão não morde, tá?'] },
+  { re: /\b(pizza\w*)\b/, pose: 'oculos', lines: ['Pizza de {v}. Dividiu com alguém ou comeu sozinho?', 'Pizza de novo? Quer virar uma?'] },
+  { re: /\b(acai|sorvete\w*|doce\w*|chocolate\w*|bolo\w*|brigadeiro\w*)\b/, pose: 'oculos', lines: ['Docinho de {v}. Engorda o corpo e emagrece a conta.', 'Açúcar e gasto, dupla perigosa.'] },
+  { re: /\b(cafe\w*|padaria|starbucks|cafeteria)\b/, pose: 'oculos', lines: ['Cafezinho de {v}. Multiplica por 30 e me conta.', 'Café na rua? Em casa sai por centavos.', 'Esse café tinha ouro em pó?'] },
+  { re: /\b(cerveja\w*|chopp|bar|boteco|balada|festa|drink\w*|vinho\w*|whisky|vodka)\b/, pose: 'cobre', lines: [
+    'Bar de {v}. A ressaca vem de brinde.', 'Saideira de {v}. Sempre é a última, né?', 'Brindou com o dinheiro do aluguel?', 'Festa boa é a que não aparece no extrato. Essa apareceu.'] },
+  { re: /\b(cinema|ingresso\w*|show|teatro|parque)\b/, pose: 'aplaude', lines: ['Cinema? A pipoca custou mais que o filme, aposto.', '{d} de {v}. Lazer também é importante. Com moderação.'] },
+  { re: /\b(viagem|hotel|pousada|airbnb|passagem|passagens|voo)\b/, pose: 'aplaude', lines: ['Viagem! Vai levar o pato?', '{v} de {d}. Manda foto, pelo menos.', 'Viajar é bom. Voltar e ver a fatura, nem tanto.'] },
+  { re: /\b(aluguel)\b/, pose: 'cobre', lines: [
+    'Aluguel pago. Pelo menos tem onde chorar dos gastos.', '{v} de aluguel. Por isso eu moro num lago.', 'Metade do salário pra ter um teto. Bem-vindo à vida adulta.', 'O dono do imóvel agradece. Ele tá de férias com teu dinheiro.'] },
+  { re: /\b(condominio)\b/, pose: 'bracos', lines: ['Condomínio de {v}. A piscina pelo menos você usa?', 'Condomínio: pagar pra ver o vizinho reclamar no grupo.'] },
+  { re: /\b(iptu)\b/, pose: 'cobre', lines: ['IPTU. Pagar pra morar no que já é seu. Faz sentido, né? Não.'] },
+  { re: /\b(movel|moveis|sofa|cama|colchao|geladeira|fogao|maquina de lavar|tv|televisao|decoracao)\b/, pose: 'aplaude', lines: ['{d} novo! A casa agradece. O bolso, nem tanto.', '{v} em {d}. Agora cuida bem, que é pra durar.'] },
+  { re: /\b(luz|energia|enel|cemig|copel|light|celpe|coelba|eletropaulo)\b/, pose: 'aponta', lines: ['Conta de luz de {v}. Apaga a luz do quarto, por favor.', 'Ar-condicionado ligado o dia todo, né? Eu vi.', 'A luz tá cara. Desliga o carregador da tomada.'] },
+  { re: /\b(agua|sabesp|saneamento)\b/, pose: 'aponta', lines: ['Conta de água de {v}. Banho de 40 minutos sai caro, hein.', 'Eu moro na água e não pago nada. Só dizendo.'] },
+  { re: /\b(internet|wifi|fibra|vivo|claro|tim|oi)\b/, pose: 'oculos', lines: ['Internet paga. Agora pode continuar me ignorando online.', '{v} de internet. Usa pra ver o extrato também, não só vídeo.'] },
+  { re: /\b(gas|botijao)\b/, pose: 'oculos', lines: ['Gás de {v}. Pelo menos agora dá pra cozinhar em vez de pedir iFood.'] },
+  { re: /\b(academia|smartfit|smart fit|bluefit|crossfit|personal)\b/, pose: 'bracos', lines: ['Academia paga. Agora vai, né? Não é doação.', 'Pagar academia e não ir é o esporte mais caro do mundo.', 'Mensalidade de {v}. Vou conferir se tá indo mesmo.'] },
+  { re: /\b(farmacia|remedio\w*|drogaria|droga raia|drogasil|pague menos)\b/, pose: 'cobre', lines: ['Farmácia de novo? Melhoras. Mas sem levar o chocolate do caixa.', 'Remédio é necessário. A bala do caixa, não.'] },
+  { re: /\b(medico|consulta|exame\w*|dentista|hospital|plano de saude|psicolog\w*|terapia)\b/, pose: 'aplaude', lines: ['Cuidar da saúde é o melhor investimento. Esse eu aprovo.', '{d}: esse gasto eu deixo passar.'] },
+  { re: /\b(racao|pet|petshop|veterinari\w*|banho e tosa|cachorro|gato)\b/, pose: 'aplaude', lines: ['Ração de {v}. O bicho come melhor que você.', 'Gasto com pet eu aprovo. Pato também é pet, tá? Cadê meu pão?'] },
+  { re: /\b(shopee|shein|aliexpress|temu|mercado livre|amazon|magalu|americanas)\b/, pose: 'aponta', lines: [
+    'Mais uma caixinha da {d} chegando?', 'O carteiro já reconhece tua casa de longe.', 'Compra online de {v}. O "frete grátis" te pegou de novo?', 'Carrinho cheio, conta vazia.'] },
+  { re: /\b(roupa\w*|camisa\w*|camiseta\w*|calca\w*|vestido\w*|blusa\w*|jaqueta\w*|tenis|sapato\w*|bolsa\w*|perfume\w*|maquiagem)\b/, pose: 'oculos', lines: [
+    'Roupa nova? O guarda-roupa já não fecha.', '{d} de {v}. Combina com o saldo negativo?', 'Tênis de {v}? Pra correr dos boletos?', 'Você tem roupa pra ir a lugares que não vai.'] },
+  { re: /\b(celular|iphone|fone\w*|notebook|computador|playstation|ps5|xbox|nintendo|switch|steam|psn|jogo\w*|game\w*|skin\w*)\b/, pose: 'cobre', lines: [
+    '{d} de {v}. Brinquedo de adulto é caro, né?', 'Skin de jogo não protege de boleto.', 'Eletrônico novo? O velho tava funcionando, aposto.'] },
+  { re: /\b(bet|aposta\w*|tigrinho|blaze|cassino|loteria|mega ?sena)\b/, pose: 'cobre', lines: [
+    'Aposta? O tigrinho nunca perde. Você sim.', '{v} em aposta. Eu aposto que não volta.', 'A casa sempre ganha. E a casa não é a tua.'] },
+  { re: /\b(presente\w*|aniversario)\b/, pose: 'aplaude', lines: ['Presente de {v}. Generoso com os outros, né? E o pato?', 'Dar presente é bonito. Lembra de mim no Natal.'] },
+  { re: /\b(curso\w*|livro\w*|faculdade|escola|mensalidade)\b/, pose: 'aplaude', lines: ['Investindo em você? Esse gasto eu aplaudo.', '{d}: finalmente um gasto que rende.'] },
+  // por categoria, quando a descrição não bate com nada acima
+  { cat: 'transporte', pose: 'oculos', lines: ['{v} de transporte. Ir e voltar tá caro, hein.', 'Mais {v} pra se locomover. Teletransporte ainda não existe, infelizmente.'] },
+  { cat: 'restaurantes', pose: 'oculos', caro: 6000, lines: ['Comendo fora de novo? {n}ª vez no mês.', 'Restaurante de {v}. Lavar louça em casa é de graça.'],
+    caras: ['{v} numa refeição? Espero que tenha sido inesquecível.', 'Comida de {v}. Tinha estrela Michelin?'] },
+  { cat: 'mercado', pose: 'oculos', lines: ['Mercado de {v}. Comprou o estoque do mês ou só besteira?', 'Foi comprar pão e voltou com {v}, né?', 'Mercado é necessário. O chocolate do caixa, não.'] },
+  { cat: 'moradia', pose: 'cobre', lines: ['{v} pra casa. Morar é caro, por isso eu moro num lago.', 'Casa própria, casa alugada... toda casa come dinheiro.'] },
+  { cat: 'contas', pose: 'aponta', lines: ['Conta paga. Uma a menos pra eu te cobrar.', '{d}: {v}. Boleto nunca tira férias.'] },
+  { cat: 'saude', pose: 'aplaude', lines: ['Saúde em primeiro lugar. Esse eu deixo.', 'Gasto com saúde não é luxo. Aprovado.'] },
+  { cat: 'lazer', pose: 'aplaude', lines: ['{v} de lazer. Diversão também é importante. Com limite.', 'Se divertiu? Ótimo. Agora volta pro orçamento.'] },
+  { cat: 'compras', pose: 'aponta', lines: ['Compra de {v}. Precisava ou só queria?', 'Mais uma comprinha. O "só hoje" já virou rotina.'] },
+];
+const DUCK_TEMAS_IN = [
+  { re: /\b(salario|pagamento|holerite)\b/, cat: 'salario', lines: ['Salário caiu! Já sei o que vai acontecer.', 'Dia de pagamento: o dia mais feliz e mais curto do mês.', '{v} entrando. Separa a parte das contas antes de sonhar.'] },
+  { re: /\b(freela\w*|bico|extra|venda|vendi)\b/, cat: 'extra', lines: ['Bico deu certo, hein. Guarda pelo menos metade.', 'Dinheiro extra! Não é dinheiro pra gastar extra, tá?', '{v} de {d}. Esse é suado, cuida bem.'] },
+  { re: /\b(pix|reembolso|devolu\w*|estorno)\b/, lines: ['Dinheiro voltando? Que milagre.', 'Reembolso: o único dinheiro que volta do além.'] },
+];
+// Acha a piada que combina com um lançamento. Devolve { lines, pose } ou null.
+function duckTema(tx) {
+  if (!tx) return null;
+  const desc = norm(tx.desc || ''), cat = tx.cat;
+  const lista = tx.type === 'in' ? DUCK_TEMAS_IN : DUCK_TEMAS;
+  const tema = lista.find((t) => t.re && desc && t.re.test(' ' + desc + ' ')) || lista.find((t) => t.cat && t.cat === cat);
+  if (!tema) return null;
+  const mes = (tx.date || today()).slice(0, 7);
+  const n = monthTx(mes).filter((t) => t.type === tx.type && (tema.re ? tema.re.test(' ' + norm(t.desc || '') + ' ') : t.cat === cat)).length || 1;
+  const nomeDesc = (tx.desc || catOf(cat).name).trim();
+  const fill = (s) => s.replace(/\{v\}/g, money(tx.amount)).replace(/\{d\}/g, nomeDesc).replace(/\{c\}/g, catOf(cat).name.toLowerCase())
+    .replace(/\{dia\}/g, +String(tx.date || today()).slice(8, 10)).replace(/\{n\}/g, n);
+  let base = tema.lines;
+  if (tema.caras && tx.amount >= tema.caro) base = tema.caras;
+  // falas com {n} só fazem sentido a partir da 2ª vez no mês
+  // {outro}: outro streaming que a pessoa já paga no mês (some se não tiver)
+  const outro = tema.tipo === 'stream' ? duckStreamings(mes).find((x) => norm(x) !== norm(nomeDesc)) : null;
+  const lines = base.filter((s) => (!s.includes('{n}') || n >= 2) && (!s.includes('{outro}') || outro))
+    .map((s) => fill(s).replace(/\{outro\}/g, outro));
+  return lines.length ? { lines, pose: tema.pose || (tx.type === 'in' ? 'aplaude' : 'oculos'), tipo: tema.tipo } : null;
+}
+// Streamings diferentes pagos no mês (pela descrição), para ele contar.
+function duckStreamings(mes) {
+  const re = DUCK_TEMAS.find((t) => t.tipo === 'stream').re, nomes = new Map();
+  for (const t of monthTx(mes)) {
+    if (t.type !== 'out' || !t.desc) continue;
+    const m = (' ' + norm(t.desc) + ' ').match(re);
+    if (m && m[1] !== 'streaming') nomes.set(m[1], t.desc.trim());
+  }
+  return [...nomes.values()];
+}
+// Falas sobre lançamentos reais dos últimos 30 dias (2 sorteados), para ele "lembrar" do que você fez.
+function duckLembra() {
+  const desde = addMonthsISO(today(), -1), out = [];
+  const recentes = S.tx.filter((t) => t.date >= desde && t.date <= today()).concat(monthTx(curMonth()).filter((t) => t.rule && t.date <= today()));
+  const comTema = recentes.map((t) => [t, duckTema(t)]).filter(([, x]) => x);
+  for (let i = 0; i < 2 && comTema.length; i++) {
+    const [t, x] = comTema.splice(Math.floor(Math.random() * comTema.length), 1)[0];
+    const dia = +t.date.slice(8, 10);
+    const nome = (t.desc || catOf(t.cat).name).trim();
+    out.push(...tagPose(x.lines, x.pose));
+    if (t.type === 'out') out.push(...tagPose([`Lembrei daquele "${nome}" de ${money(t.amount)} no dia ${dia}. Ainda tô processando.`,
+      `Dia ${dia}: "${nome}", ${money(t.amount)}. Não esqueci, não.`], x.pose));
+  }
+  const k = duckStreamings(curMonth());
+  if (k.length >= 2) out.push(...tagPose([`${k.length} streamings no mês: ${k.join(', ')}. Dá tempo de assistir tudo isso?`], 'bracos'));
+  return out;
+}
 tagPose(DUCK_ECONOMIA, 'aplaude'); tagPose(DUCK_EXAGERO, 'cobre'); tagPose(DUCK_SALDO_BAIXO, 'oculos'); tagPose(DUCK_CHATO, 'chama');
 tagPose(['Psiu. Vamos conversar.', 'Me explica uma coisa aqui.', 'Eu não vou embora. Pode ir se acostumando.'], 'chama');
 tagPose(['Isso é saldo ou troco?', 'Você parece tímido financeiramente.','Tô de olho em você. 👀', 'Quack. Só passando pra julgar.', 'Eu não julgo. Mentira, eu julgo sim.'], 'oculos');
@@ -2144,6 +2258,9 @@ function duckLines() {
   if (antes && agora < antes * 0.85) L.push(...DUCK_ECONOMIA.map((s) => s.replace('{v}', money(antes - agora))));
   if (antes && agora > antes * 1.25) L.push(...DUCK_EXAGERO);
   if (conta >= 0 && conta < 50000) L.push(...DUCK_SALDO_BAIXO.map((s) => s.replace('{v}', money(conta))));
+  // piadas sobre lançamentos de verdade (carro, lanche, streaming...): repetidas para sair mais que as genéricas
+  const lembra = duckLembra();
+  L.push(...lembra, ...lembra, ...lembra);
   // genéricas: muitas, para quase nunca repetir
   L.push(...DUCK_GERAIS);
   if (duckLevel() === 'chato') L.push(...DUCK_CHATO);
@@ -2256,6 +2373,17 @@ function duckOnSave(tx) {
     else if (mesCat >= 3 && !tx.rule) lines = tagPose(fill(DUCK_REPETIDA), 'bracos');
     else if (tx.amount <= 3000 && !tx.rule) lines = tagPose(fill(DUCK_IMPULSO), 'aponta');
     else lines = tagPose(fill(DUCK_COMPRA).concat(`Vixe, mais ${money(tx.amount)} em ${c}.`, `${money(tx.amount)}? Precisava mesmo?`), 'oculos');
+  }
+  // piada sobre o assunto (carro, lanche, streaming, aluguel...) na maioria das vezes
+  const tema = duckTema(tx);
+  if (tema && Math.random() < 0.75) {
+    let tl = tema.lines;
+    if (tema.tipo === 'stream') {
+      const k = duckStreamings(tx.date.slice(0, 7));
+      if (k.length >= 2) tl = tl.concat(`Já são ${k.length} streamings: ${k.join(', ')}. Vira uma locadora logo.`);
+    }
+    setTimeout(() => duckSay(duckFresh(tl), tema.pose), 700);
+    return;
   }
   setTimeout(() => duckSay(duckFresh(lines)), 700);
 }

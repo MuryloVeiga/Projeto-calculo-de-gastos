@@ -27,7 +27,7 @@ Backup dos dados do PC (16/10): `D:\Users\Desktop\financas-backup-2026-10-16.jso
 
 ## Regras de trabalho (importante)
 - **Não fazer commit nem publicar sem o Murylo pedir** ("pode commitar", "publica").
-- Para publicar: aumentar `VERSION` em `sw.js` no formato **2.x** (2.8 já está no código, ainda não publicada; depois dela: **2.9**), `git add`, commit, `git push`.
+- Para publicar: aumentar `VERSION` em `sw.js` no formato **2.x** (última publicada: 2.8; **2.9** já está no `sw.js`, commitada e não publicada; depois: **2.10**), `git add`, commit, `git push`.
   - Commits com e-mail privado: `336343421+MuryloVeiga@users.noreply.github.com` (já configurado no repositório local).
   - No PowerShell, **não usar aspas duplas** dentro da mensagem do commit (quebra o comando).
   - Depois do push, esperar o GitHub Pages publicar (`gh api repos/MuryloVeiga/Projeto-calculo-de-gastos/pages/builds/latest`).
@@ -97,6 +97,7 @@ Aparência (Escuro/Claro) · 🦆 Pato (Desligado/De boa/Zoeiro/Insuportável) �
 - **Falas por aba** (Investir, Previsão, Lançamentos, Resumo, Ajustes) ao entrar na aba; reage ao **salvar gasto/receita/abastecimento**.
 - **Cutucar** 3× = fica bravo (avermelha + tremida). **Segurar e arrastar** = carrega (pernas pedalando); **soltar rápido** = joga (física com quique nas bordas e no chão) e ele briga.
 - **Mais de 100 falas** em bancos (`DUCK_GERAIS`, `DUCK_ECONOMIA`, `DUCK_EXAGERO`, `DUCK_SALDO_BAIXO`, `DUCK_CHATO`, e ao salvar: `DUCK_COMPRA`, `DUCK_REPETIDA`, `DUCK_IMPULSO`, `DUCK_GRANDE`). Ao salvar, reage conforme o gasto: grande (2,5× a média e ≥ R$ 150), repetido (3ª vez na categoria no mês), pequeno (≤ R$ 30) ou comum.
+- **Piadas pelo assunto** (`DUCK_TEMAS`, `DUCK_TEMAS_IN`, função `duckTema`): pela descrição (oficina/conserto → "Esse carro velho quebrou de novo?", lanche caro, iFood, Netflix/Spotify (cita o outro streaming que já paga), aluguel, luz, academia, Shopee, apostas...) e, sem palavra conhecida, pela categoria. Ao salvar usa o tema 75% das vezes; nas falas soltas, `duckLembra` sorteia 2 lançamentos reais dos últimos 30 dias ("Lembrei daquele "Lanche" de R$ 50 no dia 12").
 - **Não repete**: `duckFresh` lembra as últimas 60 falas (localStorage `financas.pato.falas`, separado dos dados).
 - **Andar**: `pato-andar.webp`, 32 quadros (8×4, quadros de 128 px mostrados a 64 px). O quadro segue a distância andada (0,443 px por quadro) para o pé não deslizar; velocidade 14 px/s. Para a esquerda, vira a imagem por CSS. Origem: `arte/Nova pasta/pato-caminhada-suave/` (LEIA-ME com o ponto de apoio; versão esquerda espelhada lá também).
 - **De frente ao falar**: `pato-frente.webp`, 6 poses × 4 quadros (`DUCK_POSES`: oculos, bracos, aponta, cobre, aplaude, chama). Metade das vezes usa a pose que combina com a fala (`tagPose`), senão sorteia; nunca repete a anterior. Origem: `arte/Imagem do ChatGPT … 03_34_30/03_34_47.png`.
@@ -108,12 +109,11 @@ Aparência (Escuro/Claro) · 🦆 Pato (Desligado/De boa/Zoeiro/Insuportável) �
 - **Escondida** com `VOICE_ON = false`: no iPhone (app da Tela de Início) a voz só funciona **uma vez por abertura do app** (limitação da Apple; recarregar não resolve). Ideia para o futuro: usar o ditado do teclado.
 
 ## Versões publicadas
-2.2 formato de versão · 2.3 botão de voz · 2.4/2.5 tentativas de voz no iPhone · 2.6 voz escondida · **2.7 previsão em gráfico + receitas em verde** (última publicada).
+2.2 formato de versão · 2.3 botão de voz · 2.4/2.5 tentativas de voz no iPhone · 2.6 voz escondida · 2.7 previsão em gráfico + receitas em verde · **2.8 pato fiscal (andar 32 quadros, poses, falas), ícone novo, débito avulso já pago** (última publicada).
 
-## Pendente (commitado em 16/10, falta publicar)
-- Gasto avulso no débito já vem pago · pato completo · ícone novo (pato dourado de óculos, `arte/icone-pato.png`).
-- `VERSION` já está **2.8** no `sw.js`: para publicar, só `git push` (quando o Murylo pedir).
-- No iPhone o ícone antigo pode ficar: apagar o atalho e adicionar de novo (exportar backup antes!).
+## Pendente
+- **2.9** commitada, falta `git push` quando o Murylo pedir: piadas do pato pelo assunto dos lançamentos.
+- No iPhone o ícone novo (da 2.8) pode não trocar sozinho: apagar o atalho e adicionar de novo (exportar backup antes!).
 
 ## Ideias combinadas para depois
 - Ampliar as palavras de cada categoria (para a voz) e o app "aprender" com correções.
