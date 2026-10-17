@@ -984,7 +984,7 @@ function vSum() {
       <div><small>Receitas</small><b class="in">${money(i)}</b></div>
       <div><small>Despesas</small><b class="out">${money(o)}</b></div>
       <div><small>Saldo do mês</small><b class="${neg(bal)}">${money(bal)}</b></div>
-      <div><small>Investimentos</small><b>${moneyR(investido)}</b></div>
+      <div><small>${ui.month > cur ? 'Investido (previsão)' : ui.month < cur ? 'Investido (fim do mês)' : 'Investimentos'}</small><b>${moneyR(investido)}</b></div>
     </div>
     ${falta ? `<p class="note" style="margin-top:12px">Falta pagar <b class="out">${money(falta)}</b> · depois de pagar tudo: <b class="${neg(conta - falta)}">${money(conta - falta)}</b></p>` : ''}
     ${inv ? `<p class="note" style="margin-top:8px">${inv > 0 ? `Guardado em investimentos neste mês: <b>${money(inv)}</b>.` : `Resgatado de investimentos neste mês: <b>${money(-inv)}</b>.`}</p>` : ''}
