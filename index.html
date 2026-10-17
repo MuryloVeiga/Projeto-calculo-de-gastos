@@ -79,6 +79,9 @@ main{max-width:640px;margin:0 auto;
   padding:calc(var(--sat) + var(--head) + 14px) 16px calc(var(--sab) + var(--tabs) + 96px)}
 .card{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
 .card h2{margin:0 0 12px;font-size:11px;font-weight:650;color:var(--label);text-transform:uppercase;letter-spacing:1px}
+.card h2.hi{display:flex;align-items:center;gap:7px}
+.card h2.hi .i{width:17px;height:17px}
+.card h2.hi::before{display:none} /* com ícone, sem o ponto */
 .card h2::before,.s-lbl::before,.ih span::before{content:"";display:var(--dot);width:6px;height:6px;border-radius:50%;background:var(--gold);margin-right:7px;vertical-align:1px}
 .in{color:var(--in)} .out{color:var(--out)}
 
@@ -1038,7 +1041,7 @@ function vSum() {
     .sort((a, b) => (a.date < b.date ? 1 : -1));
   const fuelTot = fuel.reduce((a, t) => a + t.amount, 0);
   h += `<section class="card">
-    <div class="ih"><h2 style="margin:0">Abastecimento</h2><button class="lnk" data-act="fuel">+ Abastecer</button></div>
+    <div class="ih"><h2 class="hi" style="margin:0">${ico('fuel')}Abastecimento</h2><button class="lnk" data-act="fuel">+ Abastecer</button></div>
     ${fuel.length ? `<p class="note" style="margin:6px 0 4px">Total no mês: <b class="out">${money(fuelTot)}</b> · ${fuel.length} abastecimento${fuel.length > 1 ? 's' : ''}</p>
       ${fuel.map((t) => `<button class="frow" data-act="edit" data-id="${esc(t.id)}">
         <span>${parseISO(t.date).toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })}${t.desc ? ` · ${esc(t.desc)}` : ''}</span><b>${money(t.amount)}</b></button>`).join('')}`
@@ -2775,6 +2778,40 @@ async function duckBring(before, after, lines, endPose) {
   if (endPose) duckSay(duckFresh(lines), endPose);
 }
 
+// Susto no saldo: pega uma nota do saldo (o número cai), foge e volta correndo para devolver. Não mexe nos dados.
+const DUCK_SUSTO = ['Opa, achei um dinheiro solto aqui.', 'Ninguém vai sentir falta dessa, né?', 'Taxa surpresa do pato!',
+  'Vou pegar emprestado. Devolvo. Talvez.', 'Saldo grande demais, vou dar uma aliviada.', 'Essa nota tá me olhando. Vou levar.'];
+const DUCK_SUSTO_VOLTA = ['Brincadeira! Tá aqui teu dinheiro.', 'Devolvi. Viu como dói ver o saldo cair?', 'Toma de volta. Era só um susto.',
+  'Pronto, saldo de volta. Respira.', 'Peguei emprestado e devolvi. Pato honesto.', 'Calma, calma. Tá tudo aí.'];
+function duckSaldoPrank() {
+  const e = saldoEl();
+  if (!e || !duckSees(e)) return false;
+  duckSustoRun();
+  return true;
+}
+async function duckSustoRun() {
+  const real = contaAte(ui.month), amt = pick([1000, 2000, 5000, 10000]);
+  duckAbort(); duck.busy = true; duck.lastPrank = performance.now();
+  duck.onAbort = () => saldoShow(real);
+  const P = notePoint();
+  showNote(P, true);
+  await duckGo({ x: P.x - D8.noteDX, y: P.y - D8.noteDY }, { speed: 75 });
+  duck.dirI = 5;
+  const g = duckGrab(false);
+  $('#dnota').hidden = true;
+  await duckWait(250);
+  saldoCount(real, real - amt);
+  await g;
+  duck.dropFn = duckDropNote; // tocar nele faz largar (e o saldo volta)
+  duckSay(duckFresh(DUCK_SUSTO));
+  const b = duckBounds(), left = duck.x < b.W / 2;
+  duck.run = true;
+  await duckGo({ x: left ? -70 : b.W + 70, y: Math.min(b.maxY, duck.y + 150) }, { speed: 135 });
+  duck.run = false;
+  await duckWait(1500 + Math.random() * 1500);
+  duckBring(real - amt, real, DUCK_SUSTO_VOLTA); // volta pelo outro lado com a nota e devolve
+}
+
 // Pegadinha: vai até uma conta não paga, "marca" como paga e depois desmarca. Não mexe nos dados.
 function duckPrank() {
   const b = duckBounds();
@@ -3072,7 +3109,7 @@ function duckWander(now) {
   if (ui.tab === 'sum' && duckBonusDue()) { duckBonus(); return; }
   if (ui.tab === 'sum' && now > (duck.guardCool || 0) && duckGuard()) return; // conta vencendo tem prioridade
   if (now - duck.lastPrank > 45000 && Math.random() < { calm: 0.05, zoeiro: 0.15, chato: 0.3 }[lv]) {
-    const pr = [duckFabPrank]; if (ui.tab === 'sum') pr.push(duckPrank, duckTopCat);
+    const pr = [duckFabPrank]; if (ui.tab === 'sum') pr.push(duckPrank, duckTopCat, duckSaldoPrank);
     pr.sort(() => Math.random() - 0.5);
     if (pr.some((f) => f())) return;
   }

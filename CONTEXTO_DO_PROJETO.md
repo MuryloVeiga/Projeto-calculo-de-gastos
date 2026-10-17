@@ -28,7 +28,7 @@ Backup dos dados do PC (16/10): `D:\Users\Desktop\financas-backup-2026-10-16.jso
 
 ## Regras de trabalho (importante)
 - **Não fazer commit nem publicar sem o Murylo pedir** ("pode commitar", "publica").
-- Para publicar: aumentar `VERSION` em `sw.js` no formato **2.x** (última publicada: **2.11**; próxima: **2.12**), `git add`, commit, `git push`.
+- Para publicar: aumentar `VERSION` em `sw.js` no formato **2.x** (última publicada: **2.12**; próxima: **2.13**), `git add`, commit, `git push`.
   - Commits com e-mail privado: `336343421+MuryloVeiga@users.noreply.github.com` (já configurado no repositório local).
   - No PowerShell, **não usar aspas duplas** dentro da mensagem do commit (quebra o comando).
   - Depois do push, esperar o GitHub Pages publicar (`gh api repos/MuryloVeiga/Projeto-calculo-de-gastos/pages/builds/latest`).
@@ -119,6 +119,7 @@ Aparência (Escuro/Claro) · 🦆 Pato (Desligado/De boa/Zoeiro/Insuportável) �
 - **2.9** commitada, falta `git push` quando o Murylo pedir: piadas do pato pelo assunto dos lançamentos.
 - **2.10 publicada (17/10)**: nome Duck, tema preto + amarelo-pato, ícones no estilo SF Symbols, pato de 8 direções com nota, pegadinha da conta e do + (`duckFabRun`: chega pela esquerda, o + encolhe até o bico, foge e devolve), barra de baixo em pílula flutuante só com ícones e o + ao lado. Próxima versão: **2.11**.
 - **2.11 publicada (17/10)**: quadrinho do Resumo diz Investido (previsão) em mês futuro e Investido (fim do mês) em mês passado.
+- **2.12 publicada (17/10)**: cena do susto no saldo (`duckSustoRun`: pega R$ 10–100 do saldo, foge e devolve; não depende dos dados, então funciona mesmo sem contas no mês); ícone da bomba de combustível no título Abastecimento.
 - No iPhone o ícone novo (da 2.8) pode não trocar sozinho: apagar o atalho e adicionar de novo (exportar backup antes!).
 
 ## Ideias combinadas para depois
