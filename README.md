@@ -1,4 +1,4 @@
-# Finanças
+# Duck
 
 App pessoal de finanças (PWA) para iPhone: abre pelo Safari, instala na tela de início e funciona offline.
 Os dados ficam só no aparelho (armazenamento do navegador); nada é enviado para a internet,

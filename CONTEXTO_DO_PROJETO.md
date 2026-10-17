@@ -17,8 +17,9 @@ App pessoal de finanças do Murylo, feito como **PWA** (página web que vira app
 | `index.html` | O app inteiro (HTML + CSS + JS num arquivo só) |
 | `sw.js` | Service worker (offline + atualização). **`VERSION`** aparece em Ajustes |
 | `manifest.webmanifest` | Nome, cores e ícones do app instalado |
-| `icon-180/192/512.png` | Ícone (pato dourado de óculos em fundo preto) |
-| `pato-andar.webp`, `pato-frente.webp` | Desenhos do pato (andar e poses de frente) |
+| `icon-180/192/512.png` | Ícone (17/10): pato em traço amarelo de óculos, fundo preto liso; fonte `arte/icone-duck-linha.webp`, desenho a 87% e dentro do círculo seguro de 40% (Android) |
+| `pato8-andar/fugir/pegar.webp`, `pato8-nota.webp` | Pato de 8 direções visto de cima (andar 16 quadros, fugir com nota 12, pegar nota 15) e a nota. Feitos de `Documents\Codex6-10-16\...\outputs\pato-oito-direcoes` (quadros de 256 reduzidos para 128) |
+| `pato-frente.webp` | Poses de frente ao falar (`pato-andar.webp` antigo não é mais usado) |
 | `arte/` | Artes originais do pato e do ícone (fontes dos .webp) |
 | `.gitignore` | Bloqueia `*.json` e `*.csv` (backups com dados pessoais) |
 | `README.md` | Descrição curta + link |
@@ -99,7 +100,10 @@ Aparência (Escuro/Claro) · 🦆 Pato (Desligado/De boa/Zoeiro/Insuportável) �
 - **Mais de 100 falas** em bancos (`DUCK_GERAIS`, `DUCK_ECONOMIA`, `DUCK_EXAGERO`, `DUCK_SALDO_BAIXO`, `DUCK_CHATO`, e ao salvar: `DUCK_COMPRA`, `DUCK_REPETIDA`, `DUCK_IMPULSO`, `DUCK_GRANDE`). Ao salvar, reage conforme o gasto: grande (2,5× a média e ≥ R$ 150), repetido (3ª vez na categoria no mês), pequeno (≤ R$ 30) ou comum.
 - **Piadas pelo assunto** (`DUCK_TEMAS`, `DUCK_TEMAS_IN`, função `duckTema`): pela descrição (oficina/conserto → "Esse carro velho quebrou de novo?", lanche caro, iFood, Netflix/Spotify (cita o outro streaming que já paga), aluguel, luz, academia, Shopee, apostas...) e, sem palavra conhecida, pela categoria. Ao salvar usa o tema 75% das vezes; nas falas soltas, `duckLembra` sorteia 2 lançamentos reais dos últimos 30 dias ("Lembrei daquele "Lanche" de R$ 50 no dia 12").
 - **Não repete**: `duckFresh` lembra as últimas 60 falas (localStorage `financas.pato.falas`, separado dos dados).
-- **Andar**: `pato-andar.webp`, 32 quadros (8×4, quadros de 128 px mostrados a 64 px). O quadro segue a distância andada (0,443 px por quadro) para o pé não deslizar; velocidade 14 px/s. Para a esquerda, vira a imagem por CSS. Origem: `arte/Nova pasta/pato-caminhada-suave/` (LEIA-ME com o ponto de apoio; versão esquerda espelhada lá também).
+- **Andar (desde 17/10)**: anda pela tela toda em 8 direções (`duckTick`, `duckWander`), escolhe um ponto, anda, para e escolhe outro. Quadro segue a distância andada (`D8.walkPx`/`runPx`). Jogar o pato agora escorrega com atrito (vista de cima), sem gravidade.
+- **Cenas** (`duck.busy`; interrompidas se pegarem o pato): despesa nova que baixa o saldo → nota aparece ao lado do saldo, ele pega (gesto só em SW) e foge pela borda, saldo desce contando (`duckHeist`); receita → entra correndo com a nota, larga e o saldo sobe (`duckBring`); pegadinha → vai até uma conta não paga, marca de mentira (classe `.pay.fake`, não mexe nos dados) e desmarca (`duckPrank`). Gancho: `duckMoney(x, lista)` depois de salvar lançamento novo avulso, gasto fixo novo ou abastecimento; se não mexe no saldo (a pagar, cartão, mês que vem) ele só "segura" a nota (`DUCK_SEGURA`).
+- **Mais cenas (17/10)**: tocar nele fugindo com a nota/o + faz largar (`duck.dropFn`; a nota volta ao saldo, que continua certo); plantão em conta não paga que vence até amanhã, batendo o pé (`duckGuard`, até 45 s); comemora quando marca conta como paga (`duckPaid`, pose aplaude); aponta a categoria campeã (`duckTopCat`); anda junto com a rolagem e tropeça se for rápida; segurar o dedo parado chama o pato (`duckFollow`); último dia do mês no positivo traz nota de bônus de enfeite (`duckBonus`, uma vez por mês, localStorage `financas.pato.bonus`).
+- **Vencimento** (opcional, só despesa): `due` (data) no lançamento e no gasto fixo (no fixo vale o mesmo dia todo mês, `ruleDue`). Aparece nas Contas do mês ("vence amanhã" em laranja, "venceu" em vermelho) e ordena a lista.
 - **De frente ao falar**: `pato-frente.webp`, 6 poses × 4 quadros (`DUCK_POSES`: oculos, bracos, aponta, cobre, aplaude, chama). Metade das vezes usa a pose que combina com a fala (`tagPose`), senão sorteia; nunca repete a anterior. Origem: `arte/Imagem do ChatGPT … 03_34_30/03_34_47.png`.
 - Ideias de interação ainda não feitas: bloquear o botão + ("Tem certeza?"), reagir a apagar/diminuir gasto, esconder o saldo com a asa, tremer a tela, bater no vidro, medalhas.
 - Para animação melhor no futuro: Rive (rive.app), com o pato em partes.
@@ -113,6 +117,7 @@ Aparência (Escuro/Claro) · 🦆 Pato (Desligado/De boa/Zoeiro/Insuportável) �
 
 ## Pendente
 - **2.9** commitada, falta `git push` quando o Murylo pedir: piadas do pato pelo assunto dos lançamentos.
+- **Não commitado (17/10)**: nome Duck, tema preto + amarelo-pato, ícones no estilo SF Symbols, pato de 8 direções com nota, pegadinha da conta e do + (`duckFabRun`: chega pela esquerda, o + encolhe até o bico, foge e devolve), barra de baixo em pílula flutuante só com ícones e o + ao lado. Publicar como **2.10** quando ele pedir.
 - No iPhone o ícone novo (da 2.8) pode não trocar sozinho: apagar o atalho e adicionar de novo (exportar backup antes!).
 
 ## Ideias combinadas para depois

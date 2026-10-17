@@ -1,6 +1,6 @@
-﻿{
-  "name": "Finanças",
-  "short_name": "Finanças",
+{
+  "name": "Duck",
+  "short_name": "Duck",
   "description": "Controle financeiro pessoal, offline.",
   "lang": "pt-BR",
   "start_url": "./",

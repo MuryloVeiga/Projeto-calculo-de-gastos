@@ -5,33 +5,40 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Finanças">
+<meta name="apple-mobile-web-app-title" content="Duck">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#000000">
 <meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<title>Finanças</title>
+<title>Duck</title>
 <style>
-/* Tema "cartão black" (padrão): preto fosco com detalhes dourados.
-   Modo claro (Ajustes): <html data-theme="light">, creme com dourado mais escuro. */
+/* Tema "Duck" (padrão): preto liso com amarelo-pato, minimalista.
+   Modo claro (Ajustes): <html data-theme="light">, creme bem claro; títulos em cinza-escuro com um ponto amarelo,
+   aba ativa em círculo preto com ícone amarelo. */
 :root{
   color-scheme:dark;
-  --bg:#000000; --card:#0f0f10; --text:#f1ede4; --muted:#8b877e; --line:#242325;
-  --brand:#c9a96e; --brand-2:#e9d5a6; --in:#4ade80; --out:#ff7a70; --chip:#1a1a1b;
-  --gold:linear-gradient(135deg,#f3e2b3 0%,#c9a96e 45%,#9a7a45 100%);
-  --shadow:0 0 0 1px rgba(255,255,255,.05);
-  --bar:rgba(0,0,0,.84); --seg-on:#2a2a2c; --toast:#1c1c1e;
+  --bg:#000000; --card:#0e0e0e; --text:#f4f4f1; --muted:#8a8a86; --line:#202020;
+  --brand:#ffc933; --brand-2:#ffd75e; --in:#4ade80; --out:#ff7a70; --chip:#181818;
+  --gold:#ffc933; --acc-rgb:255,201,51; --on-acc:#111111;
+  --shadow:none;
+  --bar:rgba(0,0,0,.86); --seg-on:#2a2a2a; --toast:#1a1a1a;
   --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
   --head:56px; --tabs:58px;
+  --side:max(16px,calc(50% - 304px)); --float:calc(var(--sab) * .55 + 12px); /* barra flutuante de baixo */
+  --label:var(--brand); --label-top:var(--brand-2); --top-ic:var(--brand); --dot:none; /* títulos e ponto amarelo antes deles */
+  --tab-on:var(--seg-on); --tab-on-ic:var(--brand-2); /* aba ativa */
 }
 :root[data-theme="light"]{
   color-scheme:light;
-  --bg:#f5f1e8; --card:#ffffff; --text:#1d1a14; --muted:#7a7263; --line:#e6dfd0;
-  --brand:#9c7a3c; --brand-2:#7d5f26; --in:#16a34a; --out:#c0392b; --chip:#f1ebdf;
-  --shadow:0 1px 2px rgba(60,45,20,.06),0 6px 18px rgba(60,45,20,.06);
-  --bar:rgba(245,241,232,.88); --seg-on:#ffffff; --toast:#2a2620;
+  --bg:#faf8f2; --card:#ffffff; --text:#141414; --muted:#74746f; --line:#ebe7dc;
+  --brand:#2b2a26; --brand-2:#2b2a26; --in:#16a34a; --out:#c0392b; --chip:#f2efe6; /* destaques em texto: cinza-escuro */
+  --gold:#ffc933; --acc-rgb:230,170,0; --on-acc:#111111;
+  --shadow:none;
+  --bar:rgba(250,248,242,.9); --seg-on:#ffffff; --toast:#1f1f1f;
+  --label:#2b2a26; --label-top:#2b2a26; --top-ic:#2b2a26; --dot:inline-block;
+  --tab-on:#141414; --tab-on-ic:#ffc933;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
@@ -44,13 +51,24 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 input,select{font:inherit;color:var(--text);font-size:16px}
 .num{font-variant-numeric:tabular-nums}
 
+/* ícones (estilo SF Symbols) */
+.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;display:inline-block;vertical-align:middle}
+.i .k{stroke:var(--knock,var(--bg))}
+.i rect.k,.i circle.k{fill:var(--knock,var(--bg))}
+.i.sm{width:1.05em;height:1.05em;vertical-align:-.17em;stroke-width:2.2}
+.i.big{width:44px;height:44px;stroke-width:1.6;color:var(--muted)}
+#tabs{--knock:var(--bg)}
+#tabs .i.f{display:none}
+#tabs button.on .i.o{display:none}
+#tabs .i.o,#tabs button.on .i.f{display:block}
+
 /* topo */
 #top{position:fixed;inset:0 0 auto 0;z-index:20;padding-top:var(--sat);
   background:var(--bar);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
 #top .bar{height:var(--head);max-width:640px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 8px}
-#top .ic{width:44px;height:44px;border-radius:12px;font-size:28px;line-height:1;color:var(--brand);display:grid;place-items:center}
+#top .ic{width:44px;height:44px;border-radius:12px;font-size:28px;line-height:1;color:var(--top-ic);display:grid;place-items:center}
 #top .ic:active{background:rgba(255,255,255,.08)}
-#mlabel,#title{font-size:13px;font-weight:650;letter-spacing:3px;text-transform:uppercase;color:var(--brand-2);padding:8px 12px;border-radius:10px}
+#mlabel,#title{font-size:13px;font-weight:650;letter-spacing:1px;text-transform:uppercase;color:var(--label-top);padding:8px 12px;border-radius:10px}
 #title{display:none;margin:0 auto}
 #monthNav{display:contents}
 #top.cfg #monthNav{display:none}
@@ -60,21 +78,22 @@ input,select{font:inherit;color:var(--text);font-size:16px}
 main{max-width:640px;margin:0 auto;
   padding:calc(var(--sat) + var(--head) + 14px) 16px calc(var(--sab) + var(--tabs) + 96px)}
 .card{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
-.card h2{margin:0 0 12px;font-size:11px;font-weight:650;color:var(--brand);text-transform:uppercase;letter-spacing:2px}
+.card h2{margin:0 0 12px;font-size:11px;font-weight:650;color:var(--label);text-transform:uppercase;letter-spacing:1px}
+.card h2::before,.s-lbl::before,.ih span::before{content:"";display:var(--dot);width:6px;height:6px;border-radius:50%;background:var(--gold);margin-right:7px;vertical-align:1px}
 .in{color:var(--in)} .out{color:var(--out)}
 
 /* saldo do mês no topo do Resumo */
 .saldo{padding:10px 4px 18px;margin-bottom:14px;border-bottom:1px solid var(--line)}
-.s-lbl{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--brand)}
+.s-lbl{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--label)}
 .s-big{font-size:40px;font-weight:650;letter-spacing:-.5px;font-variant-numeric:tabular-nums;margin:4px 0 16px}
 .s-big.neg{color:var(--out)}
 .s-big.pos{color:var(--in)}
 .s-row{display:grid;grid-template-columns:repeat(3,auto);justify-content:space-between;gap:8px}
-.s-row small{display:block;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.s-row small{display:block;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
 .s-row b{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
 .s-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 10px}
 .s-grid>div{background:var(--chip);border-radius:12px;padding:10px 12px}
-.s-grid small{display:block;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.s-grid small{display:block;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
 .s-grid b{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
 @media (max-width:360px){.s-big{font-size:34px}.s-row b,.s-grid b{font-size:13px}}
 
@@ -121,6 +140,14 @@ main{max-width:640px;margin:0 auto;
 .row:first-child{border-top:0}
 .row:active{background:var(--chip)}
 .em{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:20px;flex:none}
+.em .i{width:22px;height:22px}
+.pay .pe .i{width:21px;height:21px;color:var(--muted)}
+.ch .i{width:18px;height:18px;color:var(--muted)}
+.cat .i{width:16px;height:16px;color:var(--muted)}
+.tog .i{color:var(--brand)}
+.seg .i{width:17px;height:17px;margin-right:5px;vertical-align:-3px}
+.empty .i.big{display:block;margin:0 auto 8px}
+#top .ic .i{width:24px;height:24px}
 .tx{flex:1;min-width:0;display:flex;flex-direction:column}
 .tx b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tx small{color:var(--muted);font-size:13px}
@@ -140,12 +167,12 @@ main{max-width:640px;margin:0 auto;
 .newcat input,.newcat select{height:44px;border-radius:12px;border:1px solid var(--line);background:var(--bg);padding:0 12px;min-width:0}
 .newcat input.e{text-align:center;font-size:20px;padding:0}
 .newcat .full{grid-column:1/-1}
-.pbtn{height:46px;border-radius:12px;background:var(--gold);color:#14110b;font-weight:700;letter-spacing:.3px}
+.pbtn{height:46px;border-radius:12px;background:var(--gold);color:var(--on-acc);font-weight:700;letter-spacing:.3px}
 .note{font-size:13px;color:var(--muted);margin:0}
 
 /* investimentos */
 .ih{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
-.ih span{font-size:11px;font-weight:650;color:var(--brand);text-transform:uppercase;letter-spacing:2px}
+.ih span{font-size:11px;font-weight:650;color:var(--label);text-transform:uppercase;letter-spacing:1px}
 .lnk{color:var(--brand-2);font-size:14px;font-weight:600;padding:6px 0}
 .lnk.full{display:block;width:100%;text-align:center;margin-top:12px;padding:12px;border-radius:12px;background:var(--chip)}
 .fc{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
@@ -154,7 +181,7 @@ main{max-width:640px;margin:0 auto;
 .fc small{color:var(--in);font-size:12px;margin-left:6px}
 .ibtns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
 .ibtns button{height:44px;border-radius:12px;background:var(--chip);font-size:13px;font-weight:650;color:var(--brand-2)}
-.ibtns button:first-child{background:var(--gold);color:#14110b}
+.ibtns button:first-child{background:var(--gold);color:var(--on-acc)}
 .hist{margin-top:12px}
 .hr{padding:8px 0;border-top:1px solid var(--line)}
 .hr:first-child{border-top:0}
@@ -163,7 +190,7 @@ main{max-width:640px;margin:0 auto;
 .hr .hs{font-size:12px;color:var(--muted);margin-top:4px}
 .hbar{height:8px;border-radius:99px;background:var(--chip);overflow:hidden;position:relative}
 .hbar i{position:absolute;inset:0 auto 0 0;border-radius:99px;background:var(--gold)}
-.hbar i.ghost{background:rgba(201,169,110,.28)}
+.hbar i.ghost{background:rgba(var(--acc-rgb),.28)}
 .flbl{display:block;font-size:12px;font-weight:650;color:var(--muted);margin:10px 0 4px}
 .flbl .fld{margin:4px 0 0;font-weight:400}
 .evs{margin-top:12px}
@@ -182,9 +209,9 @@ main{max-width:640px;margin:0 auto;
 .pin{position:relative;flex:none}
 .ptabs button{scroll-snap-align:center}
 .psvg{display:block}
-.parea{fill:rgba(201,169,110,.14)}
+.parea{fill:rgba(var(--acc-rgb),.14)}
 .pline{fill:none;stroke:var(--brand);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
-.pv{stroke:rgba(201,169,110,.25);stroke-width:1}
+.pv{stroke:rgba(var(--acc-rgb),.25);stroke-width:1}
 .pzero{stroke:var(--out);stroke-width:1;stroke-dasharray:4 4;opacity:.5}
 .pdot{fill:var(--brand)}
 .pdot.neg{fill:var(--out)}
@@ -192,7 +219,7 @@ main{max-width:640px;margin:0 auto;
 .plbl{position:absolute;transform:translate(-50%,-100%);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 9px;
   font-size:12.5px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums;box-shadow:0 2px 8px rgba(0,0,0,.18)}
 .plbl::after{content:"";position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);border:6px solid transparent;border-top-color:var(--card);border-bottom:0}
-.plbl.sel{font-size:16px;font-weight:750;color:var(--text);padding:7px 13px;z-index:2;border-color:rgba(201,169,110,.5)}
+.plbl.sel{font-size:16px;font-weight:750;color:var(--text);padding:7px 13px;z-index:2;border-color:rgba(var(--acc-rgb),.5)}
 .plbl.neg{color:var(--out)}
 .plbl.pos{color:var(--in)}
 .ptit{position:absolute;transform:translate(-50%,-100%);font-size:12px;color:var(--muted);white-space:nowrap}
@@ -212,34 +239,61 @@ main{max-width:640px;margin:0 auto;
 .xrow .tx b{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .xrow .tx small{color:var(--muted);font-size:12px}
 .xrow .em{width:34px;height:34px;font-size:17px}
+.xrow .em .i{width:19px;height:19px}
 .xrow .am{font-weight:650;font-variant-numeric:tabular-nums;white-space:nowrap;font-size:14px}
 .xcard{margin:6px 0;padding:4px 12px;border-radius:12px;background:var(--chip)}
 .xcard .xch{display:flex;justify-content:space-between;padding:8px 0;font-weight:650;font-size:14px}
 .xcard .xrow .em{background:transparent!important}
 
-/* pato que anda pela tela e enche o saco */
-#duck{position:fixed;left:0;bottom:calc(var(--sab) + var(--tabs) + 1px);z-index:14;width:52px;height:49px;will-change:transform;cursor:grab;-webkit-user-select:none;user-select:none;touch-action:none}
-#duck.drag{cursor:grabbing;z-index:16}
+/* pato que anda pela tela toda e enche o saco. #duck é um ponto (os pés); o desenho fica em volta dele.
+   Pranchas de 8 direções (linhas N, NE, E, SE, S, SW, W, NW), quadros de 128 px mostrados em 92 px, pé no ponto 46,66.5:
+   pato8-andar.webp (16 quadros), pato8-fugir.webp (12, com a nota no bico), pato8-pegar.webp (15, pegando a nota, só SW).
+   De frente (falando): pato-frente.webp, 6 poses x 4 quadros de 52x49. O quadro é escolhido no duckTick. */
+#duck{position:fixed;left:0;top:0;width:0;height:0;z-index:14;will-change:transform;pointer-events:none;-webkit-user-select:none;user-select:none}
+#duck.drag{z-index:16}
+#dsprite{position:absolute;left:-46px;top:-66.5px;width:92px;height:92px;transform-origin:46px 66.5px}
+.dbody{width:92px;height:92px}
+.dfr{width:92px;height:92px;background:url(pato8-andar.webp) 0 0/1472px 736px no-repeat}
+#duck.run .dfr{background-image:url(pato8-fugir.webp);background-size:1104px 736px}
+#duck.grab .dfr{background-image:url(pato8-pegar.webp);background-size:736px 184px}
+#duck.front .dfr{width:52px;height:49px;margin:19.5px 0 0 20px;background-image:url(pato-frente.webp);background-size:208px 294px}
 #duck.angry .dfr{filter:saturate(1.5) hue-rotate(-14deg) brightness(.95)}
-#dsprite{width:52px;height:49px;display:block}
-.dbody,.dfr{width:52px;height:49px;display:block}
-/* andar: 32 quadros de 64px em 8x4 (pato-andar.webp), pé no ponto 128,221 do quadro original; de frente: 6 poses x 4 quadros
-   (pato-frente.webp). O quadro é escolhido no duckTick. */
-.dfr{width:64px;height:64px;margin:-6px 0 0 -6px;background:url(pato-andar.webp) 0 0/512px 256px no-repeat}
-#duck.front .dfr{width:52px;height:49px;margin:0;background-image:url(pato-frente.webp);background-size:208px 294px}
 #duck.angry .dbody{animation:dshake .12s linear 6}
+#duck.peck .dbody{animation:dpeck .5s ease-in-out 2}
+#duck.tap .dbody{animation:dtap .45s ease-in-out infinite}
+#duck.tumble .dbody{animation:dtumble .75s ease-in-out}
+.dbody{transform-origin:46px 66.5px}
+@keyframes dtap{0%,100%{transform:none}50%{transform:translateY(-3px)}}
+@keyframes dtumble{0%,100%{transform:none}20%{transform:rotate(-24deg)}45%{transform:rotate(16deg)}70%{transform:rotate(-8deg)}}
+#dmark{position:fixed;left:0;top:0;z-index:13;width:28px;height:28px;margin:-14px 0 0 -14px;border-radius:50%;border:2px solid var(--brand);
+  pointer-events:none;animation:dmark 1s ease-out infinite}
+@keyframes dmark{0%{transform:scale(.4);opacity:1}100%{transform:scale(1.3);opacity:0}}
+/* segurar o dedo na tela chama o pato: sem menu de copiar/selecionar texto (campos continuam editáveis) */
+main{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+main input,main select,main textarea{-webkit-user-select:text;user-select:text}
 @keyframes dshake{0%,100%{transform:translateX(0)}50%{transform:translateX(1.2px)}}
-.dbub{position:absolute;bottom:50px;left:0;width:max-content;max-width:min(260px,calc(100vw - 32px));background:var(--card);color:var(--text);
-  border:1px solid rgba(201,169,110,.55);border-radius:14px;padding:8px 12px;font-size:13.5px;line-height:1.35;box-shadow:0 6px 18px rgba(0,0,0,.3);
+@keyframes dpeck{0%,100%{transform:none}45%{transform:translate(var(--pk,-4px),2px)}}
+.dhit{position:absolute;left:-28px;top:-54px;width:56px;height:60px;pointer-events:auto;cursor:grab;touch-action:none}
+#duck.drag .dhit{cursor:grabbing}
+#dnota{position:fixed;left:0;top:0;z-index:13;width:17px;height:11px;margin:-5.5px 0 0 -8.5px;background:url(pato8-nota.webp) 0 0/100% 100% no-repeat;
+  pointer-events:none;transition:opacity .35s,transform .35s}
+#dnota.pop{animation:dpop .35s ease-out}
+@keyframes dpop{0%{opacity:0;transform:translateY(-14px) scale(.4)}100%{opacity:1}}
+.pay.fake .box{background:var(--gold);border-color:transparent}
+.pay.fake .box::after{content:"✓"}
+.pay.fake .tx b,.pay.fake .am{color:var(--muted);text-decoration:line-through}
+.dbub{position:absolute;bottom:62px;left:0;width:max-content;max-width:min(260px,calc(100vw - 32px));background:var(--card);color:var(--text);
+  border:1px solid rgba(var(--acc-rgb),.55);border-radius:14px;padding:8px 12px;font-size:13.5px;line-height:1.35;box-shadow:0 6px 18px rgba(0,0,0,.3);
   opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;pointer-events:none}
 .dbub.show{opacity:1;transform:none}
+.dbub.below{bottom:auto;top:16px}
 
 /* contas do mês */
 .paysum{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:6px}
 .paysum b{color:var(--text);font-variant-numeric:tabular-nums}
 .pay{display:flex;align-items:center;gap:10px;width:100%;padding:3px 0;border-top:1px solid var(--line)}
 .pay .pbody{flex:1;min-width:0;display:flex;align-items:center;gap:10px;text-align:left;padding:8px 0}
-.pay .box{width:24px;height:24px;border-radius:7px;border:2px solid var(--muted);flex:none;display:grid;place-items:center;font-size:14px;font-weight:800;color:#14110b;
+.pay .box{width:24px;height:24px;border-radius:7px;border:2px solid var(--muted);flex:none;display:grid;place-items:center;font-size:14px;font-weight:800;color:var(--on-acc);
   margin:8px 0;box-shadow:0 0 0 10px transparent}
 .paydet{margin:0 0 8px 34px;padding:6px 12px;border-radius:12px;background:var(--chip)}
 .paydet>div{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:14px}
@@ -257,33 +311,36 @@ main{max-width:640px;margin:0 auto;
 .pay.on .tx b,.pay.on .am{color:var(--muted);text-decoration:line-through}
 
 /* botão + e abas */
-#fab{position:fixed;right:max(16px,calc(50% - 304px));bottom:calc(var(--sab) + var(--tabs) + 16px);z-index:15;
-  width:58px;height:58px;border-radius:50%;background:var(--gold);color:#14110b;
-  box-shadow:0 6px 22px rgba(201,169,110,.35);display:grid;place-items:center}
+#fab{position:fixed;right:var(--side);bottom:var(--float);z-index:15;
+  width:58px;height:58px;border-radius:50%;background:var(--gold);color:var(--on-acc);
+  box-shadow:0 6px 22px rgba(var(--acc-rgb),.35);display:grid;place-items:center}
 #fab:active{transform:scale(.94)}
+#fab.carried{pointer-events:none;box-shadow:none}
 #fab svg{width:28px;height:28px}
 #fab.hide,#mic.hide{display:none}
 /* microfone: menor, empilhado em cima do + */
-#mic{position:fixed;right:max(23px,calc(50% - 297px));bottom:calc(var(--sab) + var(--tabs) + 86px);z-index:15;
-  width:44px;height:44px;border-radius:50%;background:var(--card);color:var(--brand);border:1px solid rgba(201,169,110,.45);
+#mic{position:fixed;right:calc(var(--side) + 7px);bottom:calc(var(--float) + 70px);z-index:15;
+  width:44px;height:44px;border-radius:50%;background:var(--card);color:var(--brand);border:1px solid rgba(var(--acc-rgb),.45);
   box-shadow:0 4px 14px rgba(0,0,0,.35);display:grid;place-items:center}
 #mic:active{transform:scale(.94)}
 #mic svg{width:22px;height:22px}
 .vwrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin:6px 0 4px;text-align:center}
-.vmic{width:84px;height:84px;border-radius:50%;background:var(--gold);color:#14110b;display:grid;place-items:center;
-  box-shadow:0 6px 22px rgba(201,169,110,.35)}
+.vmic{width:84px;height:84px;border-radius:50%;background:var(--gold);color:var(--on-acc);display:grid;place-items:center;
+  box-shadow:0 6px 22px rgba(var(--acc-rgb),.35)}
 .vmic svg{width:38px;height:38px}
 .vmic.on{animation:vpulse 1.2s ease-in-out infinite}
 .vdiag{font-size:11px;color:var(--muted);opacity:.7;margin:-6px 0 0;min-height:14px}
-#vText.hl{border-color:var(--brand);box-shadow:0 0 0 3px rgba(201,169,110,.25)}
-@keyframes vpulse{0%,100%{box-shadow:0 0 0 0 rgba(201,169,110,.55)}50%{box-shadow:0 0 0 16px rgba(201,169,110,0)}}
-#tabs{position:fixed;inset:auto 0 0 0;z-index:15;background:var(--bar);
-  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding-bottom:var(--sab)}
-#tabs .in-{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);height:var(--tabs)}
-#tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;font-weight:600;color:var(--muted)}
-#tabs button.on{color:var(--brand)}
-@media (prefers-color-scheme:dark){#tabs button.on{color:var(--brand-2)}}
-#tabs svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#vText.hl{border-color:var(--brand);box-shadow:0 0 0 3px rgba(var(--acc-rgb),.25)}
+@keyframes vpulse{0%,100%{box-shadow:0 0 0 0 rgba(var(--acc-rgb),.55)}50%{box-shadow:0 0 0 16px rgba(var(--acc-rgb),0)}}
+/* abas: pílula flutuante só com ícones (o nome fica para leitores de tela); a ativa ganha um círculo. O + fica ao lado. */
+#tabs{position:fixed;left:var(--side);right:calc(var(--side) + 68px);bottom:var(--float);z-index:15;height:var(--tabs);padding:5px;
+  background:var(--bar);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:999px;
+  box-shadow:0 8px 24px rgba(0,0,0,.28);transition:right .2s}
+#tabs.wide{right:var(--side)}
+#tabs .in-{display:grid;grid-template-columns:repeat(5,1fr);height:100%}
+#tabs button{justify-self:center;align-self:center;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0;line-height:0;color:var(--muted);transition:background .15s}
+#tabs button.on{color:var(--tab-on-ic);background:var(--tab-on);--knock:var(--tab-on)}
+#tabs .i{width:25px;height:25px}
 
 /* folha de lançamento */
 .wrap{position:fixed;inset:0;z-index:40}
@@ -303,11 +360,14 @@ main{max-width:640px;margin:0 auto;
 .fld{width:100%;height:46px;border-radius:12px;border:1px solid var(--line);background:var(--bg);padding:0 12px;margin-bottom:10px;-webkit-appearance:none;appearance:none}
 .chips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:2px 0 12px}
 .chip{display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 4px;border-radius:14px;background:var(--chip);font-size:12px;border:2px solid transparent;text-align:center;min-width:0}
-.chip span{font-size:22px}
+.chip span{font-size:22px;display:grid;place-items:center;height:28px}
+.chip .i{width:24px;height:24px}
 .chip em{font-style:normal;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.chip.on{border-color:var(--brand-2);background:color-mix(in srgb,var(--brand-2) 16%,var(--card))}
+.chip.on{border-color:var(--brand-2);background:color-mix(in srgb,var(--brand-2) 16%,var(--card));--knock:color-mix(in srgb,var(--brand-2) 16%,var(--card))}
+.chip.on .i{color:var(--brand-2)}
 .two-f{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .two-f label{display:block;font-size:12px;font-weight:650;color:var(--muted);margin-bottom:4px}
+.two-f .opt{font-weight:400}
 .two-f label .fld{margin:4px 0 10px;font-weight:400;color:var(--text);text-transform:none}
 .acts{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap}
 .acts .pbtn{flex:1;min-width:120px}
@@ -335,16 +395,26 @@ main{max-width:640px;margin:0 auto;
 /* confirmação: cartão no meio da tela, por cima de tudo */
 #wrapC .backdrop{background:rgba(0,0,0,.7)}
 #wrapC .sheet{top:50%;bottom:auto;left:16px;right:16px;max-width:400px;border-radius:20px;padding:22px 18px 18px;
-  border:1px solid rgba(201,169,110,.35);box-shadow:0 20px 50px rgba(0,0,0,.8);
+  border:1px solid rgba(var(--acc-rgb),.35);box-shadow:0 20px 50px rgba(0,0,0,.8);
   transform:translateY(-50%) scale(.92);opacity:0;transition:transform .2s,opacity .2s}
 #wrapC.open .sheet{transform:translateY(-50%);opacity:1}
 #wrapC .grab{display:none}
 
-#toast{border:1px solid rgba(201,169,110,.4);position:fixed;left:50%;bottom:calc(var(--sab) + var(--tabs) + 86px);transform:translate(-50%,20px);z-index:60;
+#toast{border:1px solid rgba(var(--acc-rgb),.4);position:fixed;left:50%;bottom:calc(var(--float) + var(--tabs) + 14px);transform:translate(-50%,20px);z-index:60;
   background:var(--toast);color:#fff;padding:10px 16px;border-radius:99px;font-size:14px;font-weight:550;opacity:0;pointer-events:none;
   transition:opacity .2s,transform .2s;max-width:88vw;text-align:center}
 #toast.show{opacity:1;transform:translate(-50%,0)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* Tema claro: amarelo-pato só onde não precisa ser lido (fundos, linhas, sublinhados); texto e ícones em cinza-escuro. */
+:root[data-theme="light"] .lnk{text-decoration:underline;text-decoration-color:var(--gold);text-decoration-thickness:2px;text-underline-offset:4px}
+:root[data-theme="light"] .lnk.full{text-decoration:none}
+:root[data-theme="light"] .chip.on{border-color:var(--gold);background:#fff4d1;--knock:#fff4d1}
+:root[data-theme="light"] .pline{stroke:var(--gold)}
+:root[data-theme="light"] .pdot{fill:var(--gold)}
+:root[data-theme="light"] .ptabs button.on{border-bottom-color:var(--gold)}
+:root[data-theme="light"] .badge{background:#ffeaa6}
+:root[data-theme="light"] .amount:focus-within{border-color:var(--gold)}
+:root[data-theme="light"] .plbl.sel{border-color:var(--gold)}
 </style>
 </head>
 <body>
@@ -352,9 +422,9 @@ main{max-width:640px;margin:0 auto;
 <header id="top">
   <div class="bar">
     <div id="monthNav">
-      <button class="ic" id="prev" aria-label="Mês anterior">‹</button>
+      <button class="ic" id="prev" aria-label="Mês anterior"><i data-ic="left"></i></button>
       <button id="mlabel" aria-label="Voltar para o mês atual"></button>
-      <button class="ic" id="next" aria-label="Próximo mês">›</button>
+      <button class="ic" id="next" aria-label="Próximo mês"><i data-ic="right"></i></button>
     </div>
     <div id="title">Ajustes</div>
   </div>
@@ -372,15 +442,18 @@ main{max-width:640px;margin:0 auto;
 <div id="duck" hidden aria-label="Pato">
   <div class="dbub" id="dbub" role="status"></div>
   <div id="dsprite" aria-hidden="true"><div class="dbody"><div class="dfr"></div></div></div>
+  <div class="dhit"></div>
 </div>
+<div id="dnota" hidden></div>
+<div id="dmark" hidden></div>
 
 <nav id="tabs">
   <div class="in-">
-    <button data-tab="sum" class="on"><svg viewBox="0 0 24 24"><path d="M5 20v-6M12 20V5M19 20v-10"/></svg>Resumo</button>
-    <button data-tab="list"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></svg>Lançamentos</button>
-    <button data-tab="prev"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Previsão</button>
-    <button data-tab="inv"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>Investir</button>
-    <button data-tab="cfg"><svg viewBox="0 0 24 24"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.5"/><circle cx="8" cy="17" r="2.5"/></svg>Ajustes</button>
+    <button data-tab="sum" class="on"><i data-ic="chart"></i>Resumo</button>
+    <button data-tab="list"><i data-ic="list"></i>Lançamentos</button>
+    <button data-tab="prev"><i data-ic="cal"></i>Previsão</button>
+    <button data-tab="inv"><i data-ic="trend"></i>Investir</button>
+    <button data-tab="cfg"><i data-ic="gear"></i>Ajustes</button>
   </div>
 </nav>
 
@@ -397,11 +470,11 @@ main{max-width:640px;margin:0 auto;
     <input class="fld" id="fDesc" placeholder="Descrição (opcional)" maxlength="60">
     <div class="chips" id="fCats"></div>
     <div class="link" id="cardWrap">
-      <label class="tog"><input type="checkbox" id="fCard"><span>💳 Vinculado ao cartão</span></label>
+      <label class="tog"><input type="checkbox" id="fCard"><span><i data-ic="card" class="sm"></i> Vinculado ao cartão</span></label>
       <select class="fld" id="fCardSel" hidden aria-label="Cartão"></select>
     </div>
     <div class="link">
-      <label class="tog"><input type="checkbox" id="fFix"><span id="fFixTxt">📌 Gasto fixo (repete todo mês)</span></label>
+      <label class="tog"><input type="checkbox" id="fFix"><span><i data-ic="repeat" class="sm"></i> <span id="fFixTxt">Gasto fixo (repete todo mês)</span></span></label>
       <div class="two-f" id="fixOpts" hidden style="margin-top:8px">
         <label>Por quantos meses?<input class="fld" type="number" id="fMonths" min="2" max="360" inputmode="numeric" placeholder="Sem fim"></label>
         <label>Termina em<input class="fld" type="month" id="fEnd"></label>
@@ -411,6 +484,7 @@ main{max-width:640px;margin:0 auto;
     </div>
     <div class="two-f">
       <label>Data<input class="fld" type="date" id="fDate"></label>
+      <label id="fDueWrap">Vencimento <span class="opt">(opcional)</span><input class="fld" type="date" id="fDue"></label>
     </div>
     <div class="acts">
       <button type="button" class="sbtn" id="btnDel" hidden>Excluir</button>
@@ -468,7 +542,7 @@ main{max-width:640px;margin:0 auto;
 
 /* ---------- dados ---------- */
 const KEY = 'financas.v1';
-const PALETTE = ['#c9a96e','#a8a29e','#e2c78f','#8d99ae','#b08d57','#d8d4cc','#9c8f7a','#c0c0c0','#7f8c8d','#a67c52'];
+const PALETTE = ['#ffc933','#a8a29e','#e2c78f','#8d99ae','#b08d57','#d8d4cc','#9c8f7a','#c0c0c0','#7f8c8d','#a67c52'];
 const DEF_OUT = [['mercado','Mercado','🛒'],['moradia','Moradia','🏠'],['transporte','Transporte','🚗'],['restaurantes','Restaurantes','🍔'],
   ['saude','Saúde','💊'],['lazer','Lazer','🎮'],['contas','Contas','💡'],['compras','Compras','🛍️'],['combustivel','Combustível','⛽'],['outros','Outros','📦']];
 const FUEL = 'combustivel';
@@ -522,6 +596,84 @@ const $ = (s, e = document) => e.querySelector(s);
 const pad = (n) => String(n).padStart(2, '0');
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
+/* ---------- ícones (estilo SF Symbols: contorno arredondado; versão cheia quando selecionado) ----------
+   o = contorno, f = cheio. Na versão cheia, ".k" é o recorte (pinta com a cor do fundo, var(--knock)). */
+const ICONS = {
+  chart: { o: '<rect x="3.5" y="12" width="4.5" height="8.5" rx="1.6"/><rect x="9.75" y="4" width="4.5" height="16.5" rx="1.6"/><rect x="16" y="8.5" width="4.5" height="12" rx="1.6"/>',
+           f: '<rect x="3.5" y="12" width="4.5" height="8.5" rx="1.6" fill="currentColor"/><rect x="9.75" y="4" width="4.5" height="16.5" rx="1.6" fill="currentColor"/><rect x="16" y="8.5" width="4.5" height="12" rx="1.6" fill="currentColor"/>' },
+  list:  { o: '<rect x="4" y="3" width="16" height="18" rx="3.5"/><path d="M8.5 8.5h7M8.5 12h7M8.5 15.5h4"/>',
+           f: '<rect x="4" y="3" width="16" height="18" rx="3.5" fill="currentColor"/><path class="k" d="M8.5 8.5h7M8.5 12h7M8.5 15.5h4"/>' },
+  cal:   { o: '<rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M3.5 10h17M8 3v3.5M16 3v3.5"/>',
+           f: '<rect x="3.5" y="5" width="17" height="15.5" rx="3.5" fill="currentColor"/><path class="k" d="M4.3 10h15.4M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/><path d="M8 3v3.5M16 3v3.5"/>' },
+  trend: { o: '<circle cx="12" cy="12" r="9"/><path d="M7.5 14.5l3-3 2.5 2.5 3.5-4M13.5 10h3v3"/>',
+           f: '<circle cx="12" cy="12" r="9" fill="currentColor"/><path class="k" d="M7.5 14.5l3-3 2.5 2.5 3.5-4M13.5 10h3v3"/>' },
+  gear:  { o: '<path d="M9.84 4.92 L10.30 2.35 L13.70 2.35 L14.16 4.92 L15.47 5.47 L17.62 3.97 L20.03 6.38 L18.53 8.53 L19.08 9.84 L21.65 10.30 L21.65 13.70 L19.08 14.16 L18.53 15.47 L20.03 17.62 L17.62 20.03 L15.47 18.53 L14.16 19.08 L13.70 21.65 L10.30 21.65 L9.84 19.08 L8.53 18.53 L6.38 20.03 L3.97 17.62 L5.47 15.47 L4.92 14.16 L2.35 13.70 L2.35 10.30 L4.92 9.84 L5.47 8.53 L3.97 6.38 L6.38 3.97 L8.53 5.47Z"/><circle cx="12" cy="12" r="3"/>',
+           f: '<path d="M9.84 4.92 L10.30 2.35 L13.70 2.35 L14.16 4.92 L15.47 5.47 L17.62 3.97 L20.03 6.38 L18.53 8.53 L19.08 9.84 L21.65 10.30 L21.65 13.70 L19.08 14.16 L18.53 15.47 L20.03 17.62 L17.62 20.03 L15.47 18.53 L14.16 19.08 L13.70 21.65 L10.30 21.65 L9.84 19.08 L8.53 18.53 L6.38 20.03 L3.97 17.62 L5.47 15.47 L4.92 14.16 L2.35 13.70 L2.35 10.30 L4.92 9.84 L5.47 8.53 L3.97 6.38 L6.38 3.97 L8.53 5.47Z" fill="currentColor"/><circle class="k" cx="12" cy="12" r="2.6"/>' },
+  cart:  { o: '<path d="M3 4h2.4l2.3 10.6a1.5 1.5 0 0 0 1.5 1.2h8.4a1.5 1.5 0 0 0 1.4-1.1L21 8H6.2"/><circle cx="9.5" cy="19.5" r="1.3"/><circle cx="17.5" cy="19.5" r="1.3"/>',
+           f: '<path d="M3 4h2.4l2.3 10.6a1.5 1.5 0 0 0 1.5 1.2h8.4a1.5 1.5 0 0 0 1.4-1.1L21 8H6.2"/><path d="M6.2 8H21l-1.9 6.7a1.5 1.5 0 0 1-1.4 1.1H9.2a1.5 1.5 0 0 1-1.5-1.2Z" fill="currentColor"/><circle cx="9.5" cy="19.5" r="1.3" fill="currentColor"/><circle cx="17.5" cy="19.5" r="1.3" fill="currentColor"/>' },
+  house: { o: '<path d="M4 10.5 12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19Z"/><path d="M10 20.5V15.5h4v5"/>',
+           f: '<path d="M4 10.5 12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19Z" fill="currentColor"/><path class="k" d="M10 20V15.5h4V20"/>' },
+  car:   { o: '<path d="M6 11l1.5-3.7A2 2 0 0 1 9.4 6h5.2a2 2 0 0 1 1.9 1.3L18 11"/><rect x="3.5" y="11" width="17" height="6.5" rx="2"/><path d="M6.5 17.5v2M17.5 17.5v2M7.5 14.2h.01M16.5 14.2h.01"/>',
+           f: '<path d="M6 11l1.5-3.7A2 2 0 0 1 9.4 6h5.2a2 2 0 0 1 1.9 1.3L18 11"/><rect x="3.5" y="11" width="17" height="6.5" rx="2" fill="currentColor"/><path d="M6.5 17.5v2M17.5 17.5v2"/><path class="k" d="M7.5 14.2h.01M16.5 14.2h.01"/>' },
+  food:  { o: '<path d="M7 3v18M4.5 3v5a2.5 2.5 0 0 0 5 0V3M18 21V3c-2.2 1.4-3.5 4-3.5 7.5V14H18"/>',
+           f: '<path d="M7 3v18M4.5 3v5a2.5 2.5 0 0 0 5 0V3M18 21V3"/><path d="M18 3c-2.2 1.4-3.5 4-3.5 7.5V14H18Z" fill="currentColor"/>' },
+  pill:  { o: '<g transform="rotate(-45 12 12)"><rect x="3" y="8.5" width="18" height="7" rx="3.5"/><path d="M12 8.5v7"/></g>',
+           f: '<g transform="rotate(-45 12 12)"><rect x="3" y="8.5" width="18" height="7" rx="3.5"/><path d="M12 8.5h5.5a3.5 3.5 0 0 1 0 7H12Z" fill="currentColor"/></g>' },
+  game:  { o: '<path d="M7.5 7h9a4.5 4.5 0 0 1 4.5 4.5v3.3a2.7 2.7 0 0 1-4.7 1.8L15 15H9l-1.3 1.6A2.7 2.7 0 0 1 3 14.8v-3.3A4.5 4.5 0 0 1 7.5 7Z"/><path d="M8 10v3M6.5 11.5h3M15.5 11h.01M17.5 12.5h.01"/>',
+           f: '<path d="M7.5 7h9a4.5 4.5 0 0 1 4.5 4.5v3.3a2.7 2.7 0 0 1-4.7 1.8L15 15H9l-1.3 1.6A2.7 2.7 0 0 1 3 14.8v-3.3A4.5 4.5 0 0 1 7.5 7Z" fill="currentColor"/><path class="k" d="M8 10v3M6.5 11.5h3M15.5 11h.01M17.5 12.5h.01"/>' },
+  bulb:  { o: '<path d="M12 3a6 6 0 0 0-3.6 10.8c.7.5 1.1 1.3 1.1 2.1v.6h5v-.6c0-.8.4-1.6 1.1-2.1A6 6 0 0 0 12 3Z"/><path d="M9.5 19h5M10.5 21.5h3"/>',
+           f: '<path d="M12 3a6 6 0 0 0-3.6 10.8c.7.5 1.1 1.3 1.1 2.1v.6h5v-.6c0-.8.4-1.6 1.1-2.1A6 6 0 0 0 12 3Z" fill="currentColor"/><path d="M9.5 19h5M10.5 21.5h3"/>' },
+  bag:   { o: '<path d="M5 8h14l-1 11.2a2 2 0 0 1-2 1.8H8a2 2 0 0 1-2-1.8Z"/><path d="M9 10.5V7a3 3 0 0 1 6 0v3.5"/>',
+           f: '<path d="M5 8h14l-1 11.2a2 2 0 0 1-2 1.8H8a2 2 0 0 1-2-1.8Z" fill="currentColor"/><path d="M9 8V7a3 3 0 0 1 6 0v1"/><path class="k" d="M9 11h.01M15 11h.01"/>' },
+  fuel:  { o: '<rect x="4" y="3.5" width="10" height="17" rx="2.5"/><rect x="7" y="6.5" width="4" height="4" rx="1"/><path d="M14 9.5h1.5a2 2 0 0 1 2 2v5a1.5 1.5 0 0 0 3 0V8.5l-2.5-2.5M3 20.5h12"/>',
+           f: '<rect x="4" y="3.5" width="10" height="17" rx="2.5" fill="currentColor"/><rect class="k" x="7" y="6.5" width="4" height="4" rx="1"/><path d="M14 9.5h1.5a2 2 0 0 1 2 2v5a1.5 1.5 0 0 0 3 0V8.5l-2.5-2.5M3 20.5h12"/>' },
+  box:   { o: '<path d="M4 7.5 12 4l8 3.5v9L12 20l-8-3.5Z"/><path d="M4 7.5 12 11l8-3.5M12 11v9"/>',
+           f: '<path d="M4 7.5 12 4l8 3.5v9L12 20l-8-3.5Z" fill="currentColor"/><path class="k" d="M5 8.2 12 11.2 19 8.2M12 11.2V19"/>' },
+  brief: { o: '<rect x="3" y="7" width="18" height="13" rx="3"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3 12.5h18"/>',
+           f: '<rect x="3" y="7" width="18" height="13" rx="3" fill="currentColor"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/><path class="k" d="M3.8 12.5h16.4"/>' },
+  money: { o: '<rect x="2.5" y="6" width="19" height="12" rx="3"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/>',
+           f: '<rect x="2.5" y="6" width="19" height="12" rx="3" fill="currentColor"/><circle class="k" cx="12" cy="12" r="2.5"/><path class="k" d="M6 12h.01M18 12h.01"/>' },
+  inbox: { o: '<path d="M4 13v5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5M12 3.5V14M8 10l4 4 4-4"/>',
+           f: '<path d="M4 13h3.5l1.5 2.5h6l1.5-2.5H20v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z" fill="currentColor"/><path d="M12 3.5V12M8.5 8.5 12 12l3.5-3.5"/>' },
+  card:  { o: '<rect x="2.5" y="5.5" width="19" height="13" rx="3"/><path d="M2.5 10h19M6.5 14.5h4"/>',
+           f: '<rect x="2.5" y="5.5" width="19" height="13" rx="3" fill="currentColor"/><path class="k" d="M3.3 10h17.4M6.5 14.5h4"/>' },
+  repeat:{ o: '<path d="M17 2.5l3 3-3 3M4 11.5V10a4.5 4.5 0 0 1 4.5-4.5H20M7 21.5l-3-3 3-3M20 12.5V14a4.5 4.5 0 0 1-4.5 4.5H4"/>' },
+  moon:  { o: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/>',
+           f: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z" fill="currentColor"/>' },
+  sun:   { o: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>',
+           f: '<circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>' },
+  grad:  { o: '<path d="M2.5 9.5 12 5l9.5 4.5L12 14Z"/><path d="M6.5 11.5v4c0 1.5 2.5 3 5.5 3s5.5-1.5 5.5-3v-4M21.5 9.5V15"/>',
+           f: '<path d="M2.5 9.5 12 5l9.5 4.5L12 14Z" fill="currentColor"/><path d="M6.5 11.5v4c0 1.5 2.5 3 5.5 3s5.5-1.5 5.5-3v-4M21.5 9.5V15"/>' },
+  bolt:  { o: '<path d="M13 2.5 5 13.5h6l-1 8 8-11h-6Z"/>',
+           f: '<path d="M13 2.5 5 13.5h6l-1 8 8-11h-6Z" fill="currentColor"/>' },
+  phone: { o: '<rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M10.5 18.5h3"/>',
+           f: '<rect x="6" y="2.5" width="12" height="19" rx="3" fill="currentColor"/><path class="k" d="M10.5 18.5h3"/>' },
+  tv:    { o: '<rect x="2.5" y="5" width="19" height="13" rx="3"/><path d="M8 21h8"/>',
+           f: '<rect x="2.5" y="5" width="19" height="13" rx="3" fill="currentColor"/><path d="M8 21h8"/>' },
+  heart: { o: '<path d="M12 20s-8-4.6-8-10.2A4.3 4.3 0 0 1 12 7.5a4.3 4.3 0 0 1 8 2.3C20 15.4 12 20 12 20Z"/>',
+           f: '<path d="M12 20s-8-4.6-8-10.2A4.3 4.3 0 0 1 12 7.5a4.3 4.3 0 0 1 8 2.3C20 15.4 12 20 12 20Z" fill="currentColor"/>' },
+  gift:  { o: '<rect x="3.5" y="8" width="17" height="4" rx="1.5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7M12 8v13M12 8C10.5 4 7 4 7 6s3 2 5 2c2 0 5 0 5-2s-3.5-2-5 2"/>' },
+  pet:   { o: '<circle cx="6" cy="10" r="1.8"/><circle cx="9.5" cy="6" r="1.8"/><circle cx="14.5" cy="6" r="1.8"/><circle cx="18" cy="10" r="1.8"/><path d="M12 11.5c-2.5 0-5 3.5-5 6 0 1.5 1 2.5 2.5 2.5 1 0 1.5-.5 2.5-.5s1.5.5 2.5.5c1.5 0 2.5-1 2.5-2.5 0-2.5-2.5-6-5-6Z"/>' },
+  search:{ o:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 20.5 20.5"/>' },
+  coin:  { o: '<circle cx="12" cy="12" r="9"/><path d="M14.8 9.2c-.5-.8-1.5-1.2-2.8-1.2-1.6 0-2.8.8-2.8 2s1.2 1.6 2.8 2 2.8.8 2.8 2-1.2 2-2.8 2c-1.3 0-2.3-.4-2.8-1.2M12 6.5V8M12 16v1.5"/>' },
+  left:  { o: '<path d="M14.5 5.5 8 12l6.5 6.5"/>' },
+  right: { o: '<path d="M9.5 5.5 16 12l-6.5 6.5"/>' },
+};
+const EMO = { '🛒': 'cart', '🏠': 'house', '🚗': 'car', '🍔': 'food', '💊': 'pill', '🎮': 'game', '💡': 'bulb', '🛍️': 'bag', '⛽': 'fuel', '📦': 'box',
+  '💼': 'brief', '💰': 'money', '📥': 'inbox', '💳': 'card', '🎓': 'grad', '📚': 'grad', '⚡': 'bolt', '📱': 'phone', '📺': 'tv',
+  '❤️': 'heart', '🎁': 'gift', '🐶': 'pet', '🐱': 'pet', '🐾': 'pet', '🍕': 'food', '🍽️': 'food', '🏡': 'house',
+  '🚙': 'car', '🚘': 'car', '💵': 'money', '💸': 'money', '🪙': 'money', '🏥': 'pill', '🩺': 'pill', '🛒️': 'cart' };
+// ico('cart') contorno; ico('cart', true) cheio; cls extra: 'sm' = do tamanho do texto, 'big' = telas vazias.
+function ico(name, filled, cls) {
+  const d = ICONS[name]; if (!d) return '';
+  return `<svg class="i ${cls || ''}" viewBox="0 0 24 24" aria-hidden="true">${(filled && d.f) || d.o}</svg>`;
+}
+// Emoji de categoria vira ícone quando existe desenho para ele; senão fica o emoji que a pessoa escolheu.
+const emo = (e, filled, cls) => EMO[e] ? ico(EMO[e], filled, cls) : esc(e);
+// Ícones fixos do HTML (<i data-ic>). Nas abas vão contorno e cheio juntos; o CSS mostra o cheio na aba ativa.
+document.querySelectorAll('#tabs [data-ic]').forEach((el) => { el.outerHTML = ico(el.dataset.ic, false, 'o') + ico(el.dataset.ic, true, 'f'); });
+document.querySelectorAll('[data-ic]').forEach((el) => { el.outerHTML = ico(el.dataset.ic, false, el.className); });
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const money = (c) => brl.format(c / 100);
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -573,7 +725,13 @@ function ruleOcc(r, m) {
   if (m < sm || (r.end && m > r.end) || r.skip.includes(m)) return null;
   const k = monthDiff(sm, m);
   return { id: `r:${r.id}:${m}`, rule: r.id, type: r.type, amount: r.amount, cat: r.cat, card: r.card || null,
-    desc: r.n ? `${r.desc || catOf(r.cat).name} (${r.k0 + k + 1}/${r.n})` : r.desc, date: addMonthsISO(r.start, k), ts: 0 };
+    desc: r.n ? `${r.desc || catOf(r.cat).name} (${r.k0 + k + 1}/${r.n})` : r.desc, date: addMonthsISO(r.start, k), ts: 0,
+    due: r.due ? ruleDue(r, m) : null };
+}
+// Vencimento de um gasto fixo no mês m: mesmo dia do vencimento escolhido (ou o último dia do mês, se não existir).
+function ruleDue(r, m) {
+  const mm = shiftMonth(m, monthDiff(r.start.slice(0, 7), r.due.slice(0, 7)));
+  return `${mm}-${pad(Math.min(+r.due.slice(8, 10), +lastDay(mm + '-01').slice(8)))}`;
 }
 function occById(id) {
   const [, rid, m] = id.split(':');
@@ -581,7 +739,9 @@ function occById(id) {
   return r ? ruleOcc(r, m) : null;
 }
 function addRule(vals, date, N) {
-  S.fixed.push({ id: uid(), ...vals, start: date, end: N ? shiftMonth(date.slice(0, 7), N - 1) : null, n: N, k0: 0, skip: [] });
+  const r = { id: uid(), ...vals, start: date, end: N ? shiftMonth(date.slice(0, 7), N - 1) : null, n: N, k0: 0, skip: [] };
+  S.fixed.push(r);
+  return r;
 }
 // Encerra a regra antes do mês m (some deste mês em diante).
 function endRuleBefore(r, m) {
@@ -739,7 +899,7 @@ function payables(m) {
   const items = [];
   for (const t of monthTx(m)) {
     if (t.type !== 'out' || cardOf(t.card)) continue;
-    items.push({ kind: t.rule ? 'rule' : 'tx', id: t.rule || t.id, m, t, amount: t.amount, date: t.date, paid: paidOf(t, m) });
+    items.push({ kind: t.rule ? 'rule' : 'tx', id: t.rule || t.id, m, t, amount: t.amount, date: t.date, due: t.due || null, paid: paidOf(t, m) });
   }
   for (const c of S.cards) {
     const x = cardInfo(c.id, m);
@@ -748,11 +908,23 @@ function payables(m) {
   }
   return items;
 }
+const tomorrow = () => { const d = parseISO(today()); d.setDate(d.getDate() + 1); return iso(d); };
+// Texto do vencimento de uma conta: "vence hoje", "vence amanhã", "venceu 10/10" ou "vence 20/10".
+function dueInfo(p) {
+  if (!p.due) return null;
+  const dd = parseISO(p.due).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  if (p.paid) return { txt: `vencia ${dd}`, cls: '' };
+  if (p.due < today()) return { txt: `venceu ${dd}`, cls: 'out' };
+  if (p.due === today()) return { txt: 'vence hoje', cls: 'warnc' };
+  if (p.due === tomorrow()) return { txt: 'vence amanhã', cls: 'warnc' };
+  return { txt: `vence ${dd}`, cls: '' };
+}
 function togglePay(kind, id, m) {
   if (kind === 'tx') { const t = S.tx.find((x) => x.id === id); if (t) t.paid = !paidOf(t, m); }
   else if (kind === 'rule') { const r = S.fixed.find((x) => x.id === id); if (r) { r.pay = r.pay || {}; r.pay[m] = !paidOf({ rule: id }, m); } }
   else { S.billPay = S.billPay || {}; S.billPay[billKey(id, m)] = !billPaid(id, m); }
   save(); render();
+  duckPaid(`${kind}|${id}|${m}`);
 }
 // Primeiro mês com algum dado (para somar o histórico do saldo em conta).
 function firstDataMonth(m) {
@@ -795,7 +967,6 @@ function vSum() {
   const cur = today().slice(0, 7);
   const invAt = ui.month === cur ? today() : lastDay(ui.month + '-01');
   const investido = S.inv.reduce((a, v) => a + simulate(v, invAt).end, 0);
-  const acc = conta + Math.round(investido);
   const neg = (n) => (n < 0 ? 'out' : '');
   let h = '';
 
@@ -813,15 +984,15 @@ function vSum() {
       <div><small>Receitas</small><b class="in">${money(i)}</b></div>
       <div><small>Despesas</small><b class="out">${money(o)}</b></div>
       <div><small>Saldo do mês</small><b class="${neg(bal)}">${money(bal)}</b></div>
-      <div><small>Acumulado</small><b class="${neg(acc)}">${money(acc)}</b></div>
+      <div><small>Investimentos</small><b>${moneyR(investido)}</b></div>
     </div>
     ${falta ? `<p class="note" style="margin-top:12px">Falta pagar <b class="out">${money(falta)}</b> · depois de pagar tudo: <b class="${neg(conta - falta)}">${money(conta - falta)}</b></p>` : ''}
-    <p class="note" style="margin-top:8px">Acumulado = saldo em conta + investimentos${S.inv.length ? ` (<b>${moneyR(investido)}</b>${ui.month > cur ? ', previsto' : ''})` : ''}.
-      ${inv ? (inv > 0 ? ` Guardado em investimentos neste mês: <b>${money(inv)}</b>.` : ` Resgatado de investimentos neste mês: <b>${money(-inv)}</b>.`) : ''}</p>
+    ${inv ? `<p class="note" style="margin-top:8px">${inv > 0 ? `Guardado em investimentos neste mês: <b>${money(inv)}</b>.` : `Resgatado de investimentos neste mês: <b>${money(-inv)}</b>.`}</p>` : ''}
   </section>`;
 
   if (pays.length) {
-    const sorted = [...pays].sort((a, b) => (a.paid - b.paid) || (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+    const when = (p) => p.due || p.date;
+    const sorted = [...pays].sort((a, b) => (a.paid - b.paid) || (when(a) < when(b) ? -1 : when(a) > when(b) ? 1 : 0));
     const pct = totalPay ? Math.round((totalPay - falta) / totalPay * 100) : 0;
     h += `<section class="card"><h2>Contas do mês</h2>
       <div class="paysum"><span>Pago <b>${money(totalPay - falta)}</b> de ${money(totalPay)}</span><span>${pct}%</span></div>
@@ -829,12 +1000,12 @@ function vSum() {
       ${sorted.map((p) => {
         let title, sub, emoji;
         if (p.kind === 'bill') {
-          emoji = '💳'; title = `Fatura ${p.c.name}`;
+          emoji = ico('card'); title = `Fatura ${p.c.name}`;
           sub = p.x.bill != null ? `inclui ${money(p.x.linked)} vinculados` : 'sem fatura informada · só os vinculados';
         } else {
           const c = catOf(p.t.cat);
-          emoji = c.emoji; title = p.t.desc || c.name;
-          sub = `${parseISO(p.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} · ${c.name}${p.kind === 'rule' ? ' · 📌 fixo' : ''}`;
+          emoji = emo(c.emoji); title = p.t.desc || c.name;
+          sub = `${parseISO(p.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} · ${c.name}${p.kind === 'rule' ? ' · fixo' : ''}`;
         }
         const pd = `data-kind="${p.kind}" data-id="${esc(p.id)}" data-m="${p.m}"`;
         const isBill = p.kind === 'bill', open = isBill && ui.payOpen === p.id + '|' + p.m;
@@ -845,16 +1016,17 @@ function vSum() {
             .sort((a, b) => (a.date < b.date ? -1 : 1));
           det = `<div class="paydet">${linked.map((t) => {
             const c = catOf(t.cat);
-            return `<div><span>${c.emoji} ${esc(t.desc || c.name)}${t.rule ? ' · 📌' : ''}<small>${parseISO(t.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} · ${esc(c.name)}</small></span><b>${money(t.amount)}</b></div>`;
+            return `<div><span>${emo(c.emoji, false, 'sm')} ${esc(t.desc || c.name)}${t.rule ? ' · fixo' : ''}<small>${parseISO(t.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} · ${esc(c.name)}</small></span><b>${money(t.amount)}</b></div>`;
           }).join('')}
-          ${p.x.extra ? `<div><span>💳 Outros gastos no cartão<small>fatura − vinculados</small></span><b>${money(p.x.extra)}</b></div>` : ''}
+          ${p.x.extra ? `<div><span>${ico('card', false, 'sm')} Outros gastos no cartão<small>fatura − vinculados</small></span><b>${money(p.x.extra)}</b></div>` : ''}
           ${!linked.length && !p.x.extra ? '<div><span>Nada vinculado a este cartão neste mês.</span></div>' : ''}
           <button class="lnk" data-act="bill" data-id="${esc(p.id)}">${p.x.bill != null ? 'Editar valor da fatura ›' : 'Informar valor da fatura ›'}</button></div>`;
         }
-        return `<div class="pay ${p.paid ? 'on' : ''}">
+        const du = dueInfo(p);
+        return `<div class="pay ${p.paid ? 'on' : ''}" data-key="${p.kind}|${esc(p.id)}|${p.m}" data-due="${p.paid ? '' : p.due || ''}">
           <button class="box" data-act="pay" ${pd} aria-pressed="${p.paid}" aria-label="Marcar como pago">${p.paid ? '✓' : ''}</button>
           <button class="pbody" data-act="${isBill ? 'payx' : 'pay'}" ${pd}><span class="pe">${emoji}</span>
-            <span class="tx"><b>${esc(title)}</b><small>${esc(sub)}${isBill ? (open ? ' · ▲' : ' · ver itens ▼') : ''}</small></span>
+            <span class="tx"><b>${esc(title)}</b><small>${esc(sub)}${du ? ` · <span class="${du.cls}">${du.txt}</span>` : ''}${isBill ? (open ? ' · ▲' : ' · ver itens ▼') : ''}</small></span>
             <span class="am">${money(p.amount)}</span></button>
         </div>${det}`;
       }).join('')}
@@ -866,7 +1038,7 @@ function vSum() {
     .sort((a, b) => (a.date < b.date ? 1 : -1));
   const fuelTot = fuel.reduce((a, t) => a + t.amount, 0);
   h += `<section class="card">
-    <div class="ih"><h2 style="margin:0">⛽ Abastecimento</h2><button class="lnk" data-act="fuel">+ Abastecer</button></div>
+    <div class="ih"><h2 style="margin:0">Abastecimento</h2><button class="lnk" data-act="fuel">+ Abastecer</button></div>
     ${fuel.length ? `<p class="note" style="margin:6px 0 4px">Total no mês: <b class="out">${money(fuelTot)}</b> · ${fuel.length} abastecimento${fuel.length > 1 ? 's' : ''}</p>
       ${fuel.map((t) => `<button class="frow" data-act="edit" data-id="${esc(t.id)}">
         <span>${parseISO(t.date).toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })}${t.desc ? ` · ${esc(t.desc)}` : ''}</span><b>${money(t.amount)}</b></button>`).join('')}`
@@ -874,7 +1046,7 @@ function vSum() {
   </section>`;
 
   if (!list.length && !extra) {
-    h += `<div class="empty"><big>🪙</big>Nenhum lançamento em ${esc(monthLabel(ui.month))}.<br>Toque no <b>+</b> para começar.</div>`;
+    h += `<div class="empty">${ico('coin', false, 'big')}Nenhum lançamento em ${esc(monthLabel(ui.month))}.<br>Toque no <b>+</b> para começar.</div>`;
   } else if (o > 0) {
     const by = {};
     for (const t of list) if (t.type === 'out') by[t.cat] = (by[t.cat] || 0) + t.amount;
@@ -882,8 +1054,8 @@ function vSum() {
     const rows = Object.entries(by).sort((a, b) => b[1] - a[1]);
     const max = rows[0][1];
     h += `<section class="card"><h2>Despesas por categoria</h2>${rows.map(([id, v]) => {
-      const c = id === '__card' ? { name: 'Outros no cartão', emoji: '💳', color: '#c9a96e' } : catOf(id);
-      return `<div class="cr"><div class="ch"><span>${c.emoji}</span><span class="cn">${esc(c.name)}</span><span class="cv">${money(v)}</span><span class="cp">${Math.round(v / o * 100)}%</span></div>
+      const c = id === '__card' ? { name: 'Outros no cartão', emoji: '💳', color: '#ffc933' } : catOf(id);
+      return `<div class="cr"><div class="ch">${emo(c.emoji)}<span class="cn">${esc(c.name)}</span><span class="cv">${money(v)}</span><span class="cp">${Math.round(v / o * 100)}%</span></div>
         <div class="track"><i style="width:${Math.max(2, v / max * 100)}%;background:${c.color}"></i></div></div>`;
     }).join('')}</section>`;
   }
@@ -911,12 +1083,12 @@ function listBody() {
   if (ui.f !== 'in' && !q) {
     const rows = S.cards.map((c) => cardInfo(c.id, ui.month)).filter((x) => x.extra > 0).map((x) =>
       `<button class="row" data-act="bill" data-id="${esc(x.c.id)}">
-        <span class="em" style="background:#c9a96e2b">💳</span>
+        <span class="em" style="background:#ffc9332b">${ico('card')}</span>
         <span class="tx"><b>Outros gastos no cartão</b><small>${esc(x.c.name)} · fatura ${money(x.bill)}</small></span>
         <span class="am out">− ${money(x.extra)}</span></button>`).join('');
     if (rows) top = `<div class="day"><span>Cartão de crédito</span></div><div class="group">${rows}</div>`;
   }
-  if (!list.length) return top + (top ? '' : `<div class="empty"><big>🔎</big>${q || ui.f !== 'all' ? 'Nada encontrado.' : 'Nenhum lançamento neste mês.'}</div>`);
+  if (!list.length) return top + (top ? '' : `<div class="empty">${ico('search', false, 'big')}${q || ui.f !== 'all' ? 'Nada encontrado.' : 'Nenhum lançamento neste mês.'}</div>`);
   list.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : (b.ts || 0) - (a.ts || 0)));
   const days = [];
   for (const t of list) {
@@ -929,8 +1101,8 @@ function listBody() {
     <div class="group">${items.map((t) => {
       const c = catOf(t.cat);
       return `<button class="row" data-act="edit" data-id="${t.id}">
-        <span class="em" style="background:${c.color}2b">${c.emoji}</span>
-        <span class="tx"><b>${esc(t.desc || c.name)}</b><small>${esc(t.desc ? c.name : (t.type === 'in' ? 'Receita' : 'Despesa'))}${t.rule ? '<span class="badge">📌 Fixo</span>' : ''}${t.type === 'out' && cardOf(t.card) ? `<span class="badge">💳 ${esc(cardOf(t.card).name)}</span>` : ''}</small></span>
+        <span class="em" style="background:${c.color}2b">${emo(c.emoji)}</span>
+        <span class="tx"><b>${esc(t.desc || c.name)}</b><small>${esc(t.desc ? c.name : (t.type === 'in' ? 'Receita' : 'Despesa'))}${t.rule ? '<span class="badge">Fixo</span>' : ''}${t.type === 'out' && cardOf(t.card) ? `<span class="badge">💳 ${esc(cardOf(t.card).name)}</span>` : ''}</small></span>
         <span class="am ${t.type}">${t.type === 'in' ? '+' : '−'} ${money(t.amount)}</span></button>`;
     }).join('')}</div>`;
   }).join('');
@@ -946,16 +1118,16 @@ function vList() {
 
 function vCfg() {
   const chips = (type) => S.cats.filter((c) => c.type === type).map((c) =>
-    `<span class="cat">${c.emoji} ${esc(c.name)}<button data-act="delcat" data-id="${esc(c.id)}" aria-label="Remover ${esc(c.name)}">×</button></span>`).join('');
+    `<span class="cat">${emo(c.emoji)} ${esc(c.name)}<button data-act="delcat" data-id="${esc(c.id)}" aria-label="Remover ${esc(c.name)}">×</button></span>`).join('');
   const last = S.lastBackup ? new Date(S.lastBackup).toLocaleDateString('pt-BR') : 'nunca';
   return `
   <section class="card"><h2>Aparência</h2>
     <div class="seg">
-      <button data-act="theme" data-v="dark" class="${S.theme !== 'light' ? 'on' : ''}">🌙 Escuro</button>
-      <button data-act="theme" data-v="light" class="${S.theme === 'light' ? 'on' : ''}">☀️ Claro</button>
+      <button data-act="theme" data-v="dark" class="${S.theme !== 'light' ? 'on' : ''}">${ico('moon', S.theme !== 'light')}Escuro</button>
+      <button data-act="theme" data-v="light" class="${S.theme === 'light' ? 'on' : ''}">${ico('sun', S.theme === 'light')}Claro</button>
     </div>
   </section>
-  <section class="card"><h2>🦆 Pato</h2>
+  <section class="card"><h2>Pato</h2>
     <div class="seg">
       ${[['off', 'Desligado'], ['calm', 'De boa'], ['zoeiro', 'Zoeiro'], ['chato', 'Insuportável']].map(([v, l]) =>
         `<button data-act="duck" data-v="${v}" class="${(S.duck || 'zoeiro') === v ? 'on' : ''}">${l}</button>`).join('')}
@@ -969,7 +1141,7 @@ function vCfg() {
   </section>
   <section class="card"><h2>Cartões de crédito</h2>
     <p class="note" style="margin-bottom:10px">Marque uma despesa como “vinculada ao cartão” e informe o total da fatura no Resumo: o app desconta as vinculadas e o resto conta como outros gastos no cartão.</p>
-    <div class="cats">${S.cards.map((c) => `<span class="cat">💳 ${esc(c.name)}<button data-act="delcard" data-id="${esc(c.id)}" aria-label="Remover ${esc(c.name)}">×</button></span>`).join('') || '<span class="note">Nenhum cartão.</span>'}</div>
+    <div class="cats">${S.cards.map((c) => `<span class="cat">${ico('card')} ${esc(c.name)}<button data-act="delcard" data-id="${esc(c.id)}" aria-label="Remover ${esc(c.name)}">×</button></span>`).join('') || '<span class="note">Nenhum cartão.</span>'}</div>
     <div class="newcat">
       <input id="ncCard" class="full" placeholder="Novo cartão (ex.: Nubank)" maxlength="24" aria-label="Nome do cartão">
       <button class="pbtn full" data-act="addcard">Adicionar cartão</button>
@@ -988,7 +1160,7 @@ function vCfg() {
   <section class="card"><h2>Seus dados</h2>
     <p class="note">${S.tx.length} lançamentos guardados ${memoryOnly ? '<b>(só na memória — este navegador não está salvando!)</b>' : 'somente neste aparelho'}. Nada é enviado para a internet. Se você limpar os dados do Safari ou apagar o app, eles somem — por isso faça backup de vez em quando.</p>
     <button class="btn danger" data-act="wipe" style="margin-top:8px">Apagar todos os dados</button>
-    <button class="btn" data-act="update" style="margin-top:4px">🔄 Buscar atualização<small>Baixa a versão mais nova do app. Seus dados não são apagados.</small></button>
+    <button class="btn" data-act="update" style="margin-top:4px">Buscar atualização<small>Baixa a versão mais nova do app. Seus dados não são apagados.</small></button>
     <p class="note" style="margin-top:10px;text-align:center">Versão do app: <b>${ui.appVersion || '—'}</b></p>
   </section>`;
 }
@@ -1002,7 +1174,7 @@ function vInv() {
   let h = `<p class="note" style="margin:0 0 14px">CDI: <b>${fmtPct(S.cdi)} ao ano</b>${cdiSrc} · rende só em dias úteis · IR descontado pela tabela regressiva, como no extrato do banco.
     <button class="lnk" data-act="inv-cdi" style="padding:0 0 0 4px">CDI ›</button></p>`;
   if (!S.inv.length) {
-    h += `<div class="empty"><big>📈</big>Nenhum investimento ainda.<br>Adicione o seu para ver quanto rende por dia e a previsão.</div>`;
+    h += `<div class="empty">${ico('trend', false, 'big')}Nenhum investimento ainda.<br>Adicione o seu para ver quanto rende por dia e a previsão.</div>`;
   }
   for (const v of S.inv) {
     const hist = simulate(v, t), fim = simulate(v, eom);
@@ -1034,7 +1206,7 @@ function vInv() {
         <button data-act="inv-out" data-id="${esc(v.id)}">Resgatar</button>
         <button data-act="inv-set" data-id="${esc(v.id)}">Atualizar saldo</button>
       </div>
-      <button class="lnk full" data-act="inv-hist" data-id="${esc(v.id)}">${ui.invOpen === v.id ? 'Esconder rendimento por mês' : '📈 Ver rendimento por mês'}</button>
+      <button class="lnk full" data-act="inv-hist" data-id="${esc(v.id)}">${ui.invOpen === v.id ? 'Esconder rendimento por mês' : 'Ver rendimento por mês'}</button>
       ${ui.invOpen === v.id ? invHist(hist, fim, cur) : ''}
     </section>`;
   }
@@ -1064,7 +1236,7 @@ function vPrev() {
     rows.push({ m, ...tt, nFix, conta: contaPrevista(m) });
   }
   if (!rows.some((d) => d.i || d.o)) {
-    return `<div class="empty"><big>📅</big>Nada previsto ainda.<br>Lance gastos e receitas fixos (📌) para ver a previsão dos próximos meses.</div>`;
+    return `<div class="empty">${ico('cal', false, 'big')}Nada previsto ainda.<br>Lance gastos e receitas fixos para ver a previsão dos próximos meses.</div>`;
   }
   if (!rows.some((d) => d.m === ui.prevSel)) ui.prevSel = cur;
   const sel = rows.find((d) => d.m === ui.prevSel);
@@ -1114,8 +1286,8 @@ function prevDetail(d) {
   const dd = (s) => parseISO(s).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
   const row = (t, sign) => {
     const c = catOf(t.cat);
-    return `<button class="xrow" data-act="edit" data-id="${esc(t.id)}"><span class="em" style="background:${c.color}2b">${c.emoji}</span>
-      <span class="tx"><b>${esc(t.desc || c.name)}</b><small>${dd(t.date)} · ${esc(c.name)}${t.rule ? ' · 📌' : ''}</small></span>
+    return `<button class="xrow" data-act="edit" data-id="${esc(t.id)}"><span class="em" style="background:${c.color}2b">${emo(c.emoji)}</span>
+      <span class="tx"><b>${esc(t.desc || c.name)}</b><small>${dd(t.date)} · ${esc(c.name)}${t.rule ? ' · fixo' : ''}</small></span>
       <span class="am ${sign === '+' ? 'in' : 'out'}">${sign} ${money(t.amount)}</span></button>`;
   };
   const byDate = (a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
@@ -1126,9 +1298,9 @@ function prevDetail(d) {
     const linked = list.filter((t) => t.type === 'out' && t.card === c.id).sort(byDate);
     const total = x.bill != null ? Math.max(x.bill, x.linked) : x.linked;
     if (!total) return '';
-    return `<div class="xcard"><div class="xch"><span>💳 Fatura ${esc(c.name)}</span><b class="out">− ${money(total)}</b></div>
+    return `<div class="xcard"><div class="xch"><span>${ico('card', false, 'sm')} Fatura ${esc(c.name)}</span><b class="out">− ${money(total)}</b></div>
       ${linked.map((t) => row(t, '−')).join('')}
-      ${x.extra ? `<div class="xrow"><span class="em">💳</span><span class="tx"><b>Outros gastos no cartão</b><small>fatura − vinculados</small></span><span class="am out">− ${money(x.extra)}</span></div>` : ''}</div>`;
+      ${x.extra ? `<div class="xrow"><span class="em">${ico('card')}</span><span class="tx"><b>Outros gastos no cartão</b><small>fatura − vinculados</small></span><span class="am out">− ${money(x.extra)}</span></div>` : ''}</div>`;
   }).join('');
   return `<section class="card" id="pdet" style="margin-top:14px">
     <div class="ih"><span>${esc(monthLabel(m))}</span><button class="lnk" data-act="goMonth" data-m="${m}">Abrir no Resumo ›</button></div>
@@ -1201,6 +1373,7 @@ function render() {
   $('#top').classList.toggle('cfg', noMonth);
   $('#title').textContent = ui.tab === 'inv' ? 'Investimentos' : ui.tab === 'prev' ? 'Previsão' : 'Ajustes';
   $('#fab').classList.toggle('hide', noMonth);
+  $('#tabs').classList.toggle('wide', noMonth);
   $('#mic').classList.toggle('hide', noMonth || !VOICE_ON);
   document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('on', b.dataset.tab === ui.tab));
   const oldPc = $('#pchart'), oldScroll = oldPc ? oldPc.scrollLeft : null;
@@ -1261,13 +1434,14 @@ function renderCatChips() {
   const cats = S.cats.filter((c) => c.type === F.type);
   if (!cats.some((c) => c.id === F.cat)) F.cat = cats.length ? cats[0].id : null;
   $('#fCats').innerHTML = cats.map((c) =>
-    `<button type="button" class="chip ${c.id === F.cat ? 'on' : ''}" data-cat="${esc(c.id)}"><span>${c.emoji}</span><em>${esc(c.name)}</em></button>`).join('');
+    `<button type="button" class="chip ${c.id === F.cat ? 'on' : ''}" data-cat="${esc(c.id)}"><span>${emo(c.emoji, c.id === F.cat)}</span><em>${esc(c.name)}</em></button>`).join('');
 }
 function setType(t) {
   F.type = t;
   document.querySelectorAll('#typeSeg button').forEach((b) => b.classList.toggle('on', b.dataset.type === t));
   renderCatChips();
   $('#cardWrap').hidden = t !== 'out' || !S.cards.length;
+  $('#fDueWrap').hidden = t !== 'out';
   syncFix();
 }
 function syncCardSel() {
@@ -1328,7 +1502,7 @@ $('#fDate').addEventListener('change', () => { if ($('#fMonths').value) endFromM
 function syncFix() {
   $('#fixOpts').hidden = !$('#fFix').checked;
   $('#fixHint').hidden = !$('#fFix').checked;
-  $('#fFixTxt').textContent = F.type === 'in' ? '📌 Receita fixa (repete todo mês)' : '📌 Gasto fixo (repete todo mês)';
+  $('#fFixTxt').textContent = F.type === 'in' ? 'Receita fixa (repete todo mês)' : 'Gasto fixo (repete todo mês)';
 }
 $('#fFix').addEventListener('change', syncFix);
 
@@ -1343,6 +1517,7 @@ function openSheet(tx, noFocus) {
   $('#fAmount').value = tx ? (tx.amount / 100).toFixed(2).replace('.', ',') : '';
   $('#fDesc').value = r ? r.desc || '' : tx ? tx.desc || '' : '';
   $('#fDate').value = tx ? tx.date : (ui.month === today().slice(0, 7) ? today() : ui.month + '-01');
+  $('#fDue').value = tx && tx.due ? tx.due : '';
   $('#fFix').checked = !!r;
   F.k0 = r ? r.k0 + monthDiff(r.start.slice(0, 7), F.occMonth) : 0;
   $('#fMonths').value = r && r.n ? r.n : '';
@@ -1396,7 +1571,8 @@ $('#sheet').addEventListener('submit', (e) => {
   const fix = $('#fFix').checked;
   const nRaw = parseInt($('#fMonths').value, 10);
   const N = fix && nRaw >= 2 ? Math.min(360, nRaw) : null;
-  const vals = { type: F.type, amount, cat: F.cat, desc, card };
+  const due = F.type === 'out' && $('#fDue').value ? $('#fDue').value : null; // vencimento (opcional)
+  const vals = { type: F.type, amount, cat: F.cat, desc, card, due };
   if (F.rule) {
     // Editando um mês de um gasto fixo: a mudança vale deste mês em diante.
     const r = S.fixed.find((x) => x.id === F.rule);
@@ -1422,13 +1598,15 @@ $('#sheet').addEventListener('submit', (e) => {
     if (t && fix) { S.tx = S.tx.filter((x) => x !== t); addRule(vals, date, N); }
     else if (t) Object.assign(t, vals, { date });
   } else if (fix) {
-    addRule(vals, date, N);
+    const nr = addRule(vals, date, N);
     duckOnSave({ ...vals, date, rule: true });
+    setTimeout(() => duckMoney(nr, S.fixed), 380);
   } else {
     // combustível no débito já entra pago (igual ao "+ Abastecer")
     const novo = { id: uid(), ...vals, date, ts: Date.now(), ...(vals.cat === FUEL && !vals.card ? { paid: true } : {}) };
     S.tx.push(novo);
     duckOnSave(novo);
+    setTimeout(() => duckMoney(novo), 380);
   }
   save();
   ui.month = date.slice(0, 7);
@@ -1615,7 +1793,7 @@ function openInv(mode, id) {
       + txtField('vText', 'O que entendi (dá para corrigir ou digitar)', '', 'placeholder="ex.: gastei 50 no mercado no Santander"')
       + `<p class="note" style="margin-top:8px">Exemplos: “gastei 80 reais de pizza no crédito”, “mercado 230 no Santander ontem”, “recebi 500 de freela”.</p>`;
   } else if (mode === 'fuel') {
-    title = '⛽ Abastecimento';
+    title = 'Abastecimento';
     body = amtField('iAmt', 'Quanto abasteceu') + txtField('iDate', 'Data', today(), 'type="date"')
       + txtField('iDesc', 'Posto ou observação (opcional)', '', 'maxlength="40"')
       + `<p class="note" style="margin-top:8px">Pago no débito: já sai do saldo em conta.</p>`;
@@ -1712,7 +1890,9 @@ $('#sheet3').addEventListener('submit', (e) => {
   } else if (I.mode === 'fuel') {
     if (!amt) { toast('Digite quanto abasteceu'); return; }
     const date = $('#iDate').value || today();
-    S.tx.push({ id: uid(), type: 'out', amount: amt, cat: FUEL, desc: $('#iDesc').value.trim(), date, ts: Date.now(), card: null, paid: true });
+    const ft = { id: uid(), type: 'out', amount: amt, cat: FUEL, desc: $('#iDesc').value.trim(), date, ts: Date.now(), card: null, paid: true };
+    S.tx.push(ft);
+    setTimeout(() => duckMoney(ft), 380);
     ui.month = date.slice(0, 7);
     msg = 'Abastecimento salvo';
     if (duckLevel() !== 'off') setTimeout(() => duckSay(duckFresh([`Mais ${money(amt)} de gasolina. Esse carro bebe mais que você.`,
@@ -2010,7 +2190,10 @@ document.querySelectorAll('.wrap:not(#wrapC) .sheet').forEach((sheet) => {
 /* ---------- pato ----------
    Anda pela barra de baixo e, se estiver ligado, fala sozinho de tempos em tempos, lendo os dados
    do mês (contas sem pagar, categoria campeã, previsão no vermelho...). Tocar nele faz falar na hora. */
-const duck = { x: 30, y: 0, vx: 0, vy: 0, rot: 0, state: 'walk', throwSpeed: 0, drag: null, dir: 1, speed: 14,
+// x, y = ponto dos pés na tela. dirI = direção (0 N, 1 NE, 2 E, 3 SE, 4 S, 5 SW, 6 W, 7 NW).
+// goal = para onde está indo; busy = numa cena (roubando nota, trazendo nota, pegadinha da conta).
+const duck = { x: 40, y: -1, vx: 0, vy: 0, rot: 0, state: 'walk', throwSpeed: 0, drag: null, dirI: 4, goal: null, busy: false, token: 0,
+  anim: 'walk', grabF: 0, idleUntil: 0, lastPrank: 0,
   pauseUntil: 0, nextTalk: 0, last: [], taps: [], raf: 0, lastT: 0, hideT: 0, angryT: 0 };
 const duckLevel = () => S.duck || 'zoeiro';
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -2398,7 +2581,7 @@ function duckSay(text, pose) {
   text = text || pickDuckLine();
   b.textContent = text;
   // vira de frente e faz o gesto da fala (sem gesto enquanto está sendo carregado ou voando)
-  if (!duck.drag && duck.state === 'walk') {
+  if (!duck.drag && duck.state === 'walk' && !duck.busy) {
     // metade das vezes usa a pose que combina com a fala; senão sorteia entre todas. Nunca repete a última.
     const outras = Object.keys(DUCK_POSES).filter((k) => k !== duck.lastPose);
     const combina = pose || DUCK_POSE.get(text);
@@ -2409,64 +2592,576 @@ function duckSay(text, pose) {
     duck.pose = { ...p, t0: now, until: now + 6000 };
   }
   b.classList.add('show');
-  duck.pauseUntil = performance.now() + 6500;
+  if (!duck.busy) duck.pauseUntil = performance.now() + 6500;
   clearTimeout(duck.hideT);
   duck.hideT = setTimeout(() => b.classList.remove('show'), 6500);
   scheduleTalk();
 }
+// Medidas do desenho na tela (quadro de 256 px mostrado em 92 px).
+const D8 = {
+  walkPx: 33.333 * 92 / 256 / 16, // quanto o pé anda por quadro de caminhada (o pé não escorrega)
+  runPx: 69.565 * 92 / 256 / 12,  // idem na corrida
+  noteDX: -76 * 92 / 256, noteDY: -3.5 * 92 / 256, // onde fica a nota (no chão, no bico) em relação aos pés, virado para SW
+};
+// Área onde ele passeia: entre o topo e a barra de abas.
+function duckBounds() {
+  const W = document.documentElement.clientWidth;
+  const topB = $('#top').getBoundingClientRect().bottom, tabT = $('#tabs').getBoundingClientRect().top;
+  return { W, topB, minX: 30, maxX: W - 30, minY: topB + 70, maxY: tabT - 6 };
+}
+// Direção do movimento: 0 N, 1 NE, 2 E, 3 SE, 4 S, 5 SW, 6 W, 7 NW (y cresce para baixo).
+const dirFrom = (dx, dy) => ((Math.round(Math.atan2(dx, -dy) * 180 / Math.PI / 45) % 8) + 8) % 8;
+
+// Passos de uma cena. Se a cena for interrompida (pegaram o pato, desligaram), duck.token muda e
+// as promessas antigas nunca terminam: a cena simplesmente para.
+function duckGo(pt, opts = {}) {
+  return new Promise((res) => { duck.goal = { pt, speed: opts.speed || 24, res }; });
+}
+function duckWait(ms) {
+  const tk = duck.token;
+  return new Promise((res) => setTimeout(() => { if (tk === duck.token) res(); }, ms));
+}
+function duckGrab(reverse) {
+  return new Promise((res) => { duck.anim = 'grab'; duck.grab = { t0: performance.now(), reverse, res, tk: duck.token }; });
+}
+function duckAbort() {
+  duck.token++;
+  duck.goal = null; duck.busy = false; duck.run = false; duck.anim = 'walk'; duck.dropFn = null;
+  $('#duck').classList.remove('tap');
+  $('#dmark').hidden = true;
+  $('#dnota').hidden = true;
+  $('#duck').classList.remove('peck');
+  document.querySelectorAll('.pay.fake').forEach((r) => r.classList.remove('fake'));
+  if (duck.onAbort) { duck.onAbort(); duck.onAbort = null; }
+}
+
+// Saldo em conta do Resumo: mostra um valor e anima a contagem de um valor a outro.
+const saldoEl = () => (ui.tab === 'sum' ? $('.saldo .s-big') : null);
+function saldoShow(v) {
+  const e = saldoEl();
+  if (e) { e.textContent = money(v); e.classList.toggle('neg', v < 0); }
+}
+function saldoCount(a, b, ms = 900) {
+  const t0 = performance.now();
+  const step = (t) => {
+    const k = Math.min(1, (t - t0) / ms);
+    saldoShow(Math.round(a + (b - a) * (1 - Math.pow(1 - k, 3))));
+    if (k < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+// Onde a nota aparece: logo à direita do número do saldo (ou no alto da tela, se o saldo não estiver à vista).
+function notePoint() {
+  const b = duckBounds(), e = saldoEl();
+  let p = { x: b.W * 0.55, y: b.minY + 20 };
+  if (e) {
+    const rg = document.createRange(); rg.selectNodeContents(e);
+    const r = rg.getBoundingClientRect();
+    if (r.bottom > b.topB + 30 && r.bottom < b.maxY - 40) p = { x: r.right + 18, y: r.bottom - 6 };
+  }
+  p.x = Math.max(b.minX + 10, Math.min(b.maxX + D8.noteDX, p.x));
+  return p;
+}
+function showNote(p, pop) {
+  const n = $('#dnota');
+  n.style.left = p.x + 'px'; n.style.top = p.y + 'px';
+  n.style.transform = ''; n.style.opacity = '';
+  n.hidden = false;
+  n.classList.remove('pop');
+  if (pop) { void n.offsetWidth; n.classList.add('pop'); }
+}
+
+// Lançamento salvo (avulso, gasto fixo ou abastecimento): despesa = o pato pega a nota do saldo e foge; receita = traz uma nota.
+// Se ainda não mexe no saldo (conta a pagar, cartão, mês que vem), ele só "segura" a nota e o saldo não muda.
+function duckMoney(x, arr = S.tx) {
+  if (duckLevel() === 'off' || duck.busy || duck.state !== 'walk') return;
+  if (Math.random() > { calm: 0.5, zoeiro: 0.9, chato: 1 }[duckLevel()]) return;
+  const m = ui.month, after = contaAte(m), k = arr.indexOf(x);
+  if (k < 0) return;
+  arr.splice(k, 1); const before = contaAte(m); arr.splice(k, 0, x);
+  if (x.type === 'out') duckHeist(before, after, before === after);
+  else duckBring(before, after, before === after ? DUCK_FUTURO : null);
+}
+const DUCK_SEGURA = ['Essa ainda não saiu. Vou segurar a nota até você pagar.', 'Conta a pagar anotada. Já separei o dinheiro. No meu bico.',
+  'Guardei essa nota pro boleto. Não confio em você.', 'Reservado pra essa conta. Ninguém mexe.', 'Vou esconder esse dinheiro até o vencimento.',
+  'Essa grana já tem dono: o boleto.', 'Separando o dinheiro da conta. Tô levando pro cofre. O cofre sou eu.'];
+const DUCK_FUTURO = ['Receita a caminho! Ainda não caiu, mas eu já tô contando.', 'Anotei o dinheiro que vai entrar. Vou esperar na porta.',
+  'Dinheiro futuro! Meu tipo favorito.', 'Quando cair na conta, eu aviso. Ou não.', 'Receita marcada. Agora é torcer pra cair.'];
+const DUCK_SOLTA = ['Tá bom, tá bom! Solto! Mas a despesa continua anotada.', 'Ai! Devolvi. O gasto continua lá, viu?',
+  'Me pegou! Leva a nota. A conta é tua mesmo.', 'Justo agora que eu ia fugir...', 'Ok, ok. Mas eu volto.', 'Que reflexo! Toma tua nota.',
+  'Ladrão que rouba ladrão... ah, deixa.'];
+const DUCK_FAB_SOLTA = ['Tá bom, toma teu +!', 'Ai! Pode ficar com o botão.', 'Me pegou. Devolvo, devolvo.', 'Era brincadeira! Toma.',
+  'Ok, ganhou. Mas gasta pouco.', 'Que dedo rápido! Toma o +.'];
+// Tocou no pato enquanto ele foge com a nota: ele larga, a nota volta para o saldo (o saldo continua certo).
+function duckDropNote() {
+  const off = BEAK_RUN[duck.dirI][0], P = { x: duck.x + off[0], y: duck.y + off[1] };
+  duckAbort();
+  showNote(P, false);
+  noteIntoSaldo(P);
+  duckAngry(1500);
+  duckSay(duckFresh(DUCK_SOLTA));
+  setTimeout(() => { const n = $('#dnota'); n.hidden = true; n.style.transform = ''; n.style.opacity = ''; }, 450);
+}
+// A nota voa até o número do saldo e some.
+function noteIntoSaldo(P) {
+  const e = saldoEl(), n = $('#dnota');
+  if (e) {
+    const rg = document.createRange(); rg.selectNodeContents(e);
+    const r = rg.getBoundingClientRect();
+    n.style.transform = `translate(${r.left + r.width / 2 - P.x}px, ${r.top + r.height / 2 - P.y}px) scale(.4)`;
+  }
+  n.style.opacity = '0';
+}
+const sayIfQuiet = (lines) => { if (!$('#dbub').classList.contains('show')) duckSay(duckFresh(lines)); };
+
+async function duckHeist(before, after, hold) {
+  duckAbort(); duck.busy = true;
+  saldoShow(before);
+  duck.onAbort = () => saldoShow(after);
+  const P = notePoint();
+  showNote(P, true);
+  await duckGo({ x: P.x - D8.noteDX, y: P.y - D8.noteDY }, { speed: 75 });
+  duck.dirI = 5;
+  const g = duckGrab(false);
+  $('#dnota').hidden = true; // daqui em diante a nota é a do desenho
+  await duckWait(250);
+  saldoCount(before, after); duck.onAbort = null;
+  await g;
+  duck.dropFn = duckDropNote; // tocar nele agora faz largar a nota
+  if (hold) duckSay(duckFresh(DUCK_SEGURA));
+  else sayIfQuiet(['Isso aqui agora é meu.', 'Obrigado pela contribuição.', 'Imposto do pato. Tchau!', 'Vou guardar pra você. Confia.', 'Peguei! Ninguém viu nada.',
+    'Essa nota vai pra uma causa nobre: eu.', 'Taxa de manutenção do pato.', 'Se o dinheiro vai embora mesmo, que vá comigo.', 'Tchau, dinheirinho!',
+    'Vou investir em pão. Rende muito.', 'Isso é o que sobra de gastar: nada. E agora nem isso.', 'Gastou? Então eu levo o troco.',
+    'Esse dinheiro tava pedindo pra sair.', 'Fugindo com teu dinheiro, igual tua fatura.', 'Pato não paga imposto. Pato cobra.']);
+  // foge pela borda mais perto, descendo na diagonal
+  const b = duckBounds(), left = duck.x < b.W / 2;
+  duck.run = true;
+  await duckGo({ x: left ? -70 : b.W + 70, y: Math.min(b.maxY, duck.y + 150) }, { speed: 135 });
+  duck.run = false; duck.dropFn = null;
+  await duckWait(1800 + Math.random() * 1500);
+  // volta andando, já sem a nota
+  duck.x = left ? duckBounds().W + DUCK_OUT : -DUCK_OUT; // volta pelo outro lado, como a cobrinha
+  await duckGo({ x: left ? duckBounds().W - 50 : 50, y: duck.y }, { speed: 32 });
+  duck.busy = false; duck.idleUntil = performance.now() + 1500;
+}
+
+async function duckBring(before, after, lines, endPose) {
+  duckAbort(); duck.busy = true;
+  saldoShow(before);
+  duck.onAbort = () => saldoShow(after);
+  const P = notePoint(), A = { x: P.x - D8.noteDX, y: P.y - D8.noteDY };
+  let b = duckBounds();
+  // sai rapidinho pela borda mais perto e volta correndo pela outra, já com a nota no bico
+  await duckWrapTo(duck.x < b.W / 2, 110);
+  await duckWait(500);
+  duck.run = true;
+  await duckGo(A, { speed: 125 });
+  duck.run = false; duck.dirI = 5;
+  await duckGrab(true); // larga a nota no chão
+  showNote(P, false);
+  await duckWait(250);
+  // a nota entra no saldo
+  const n = $('#dnota');
+  noteIntoSaldo(P);
+  saldoCount(before, after); duck.onAbort = null;
+  if (lines && !endPose) duckSay(duckFresh(lines));
+  else if (!lines) sayIfQuiet(['Trouxe pra você. Não gasta tudo.', 'Entrega do pato! Assina aqui.', 'Dinheiro na conta. De nada.', 'Olha o que eu achei! Agora é teu.',
+    'Receita entregue. Cuida bem dela.', 'Chegou dinheiro! Segura antes que fuja.', 'Pato correio: uma nota pra você.',
+    'Esse aqui é pra guardar, viu?', 'Depositei. Não precisa agradecer. Mas pode.', 'Dinheiro novo na área. Não gasta no primeiro dia.',
+    'Trouxe correndo. Agora deixa ele quieto aí.', 'Olha que bonito o saldo subindo.']);
+  await duckWait(450);
+  n.hidden = true; n.style.transform = ''; n.style.opacity = '';
+  duck.busy = false; duck.idleUntil = performance.now() + 1200;
+  if (endPose) duckSay(duckFresh(lines), endPose);
+}
+
+// Pegadinha: vai até uma conta não paga, "marca" como paga e depois desmarca. Não mexe nos dados.
+function duckPrank() {
+  const b = duckBounds();
+  const boxes = [...document.querySelectorAll('.pay:not(.on) .box')].filter((el) => {
+    const r = el.getBoundingClientRect();
+    return r.top > b.minY - 40 && r.bottom < b.maxY - 10 && r.left > 0;
+  });
+  if (!boxes.length) return false;
+  duckPrankRun(pick(boxes));
+  return true;
+}
+async function duckPrankRun(box) {
+  const row = box.closest('.pay');
+  duckAbort(); duck.busy = true; duck.lastPrank = performance.now();
+  duck.onAbort = () => row.classList.remove('fake');
+  // o bico (virado para a esquerda) fica em cima da caixinha
+  const tgt = () => {
+    if (!box.isConnected) return null;
+    const r = box.getBoundingClientRect();
+    return { x: r.left + r.width / 2 + 31, y: r.top + r.height / 2 + 16 };
+  };
+  await duckGo(tgt, { speed: 45 });
+  duck.dirI = 6;
+  $('#duck').style.setProperty('--pk', '-4px'); $('#duck').classList.add('peck');
+  await duckWait(520);
+  row.classList.add('fake');
+  await duckWait(480);
+  $('#duck').classList.remove('peck');
+  duckSay(duckFresh(['Pronto, paguei pra você. De nada.', 'Marquei como pago. Problema resolvido.', 'Pago! Viu como é fácil?', 'Resolvido. Pode me agradecer.',
+    'Conta paga com dinheiro de pato. Vale?', 'Pagamento feito com bico. Seguro e rápido.', 'Marquei. Agora é só esquecer, né?',
+    'Pago! Usei as economias do lago.', 'Uma conta a menos. Que pato eficiente.']));
+  await duckWait(3200);
+  row.classList.remove('fake'); duck.onAbort = null;
+  duck.busy = false;
+  duckSay(duckFresh(['Brincadeira. Paga você.', 'Mentira, ainda tá devendo.', 'Desmarquei. Achou que ia ser fácil?', 'Pegadinha do pato. Vai pagar.',
+    'Ops, o banco recusou. O banco sou eu.', 'Pato não tem conta no banco. Desculpa.', 'Era só pra ver tua cara de alívio.',
+    'Voltou a ser dívida. A vida é assim.', 'Achou que pato paga boleto? Quack.']));
+}
+
+// Centro da nota no bico em cada quadro da corrida, por direção (relativo aos pés).
+const BEAK_RUN = [[[-0.5,-45.0],[0.0,-44.4],[0.3,-44.0],[0.4,-44.5],[0.3,-45.3],[0.1,-45.6],[-0.5,-45.0],[-1.0,-44.2],[-1.3,-44.0],[-1.4,-44.6],[-1.3,-45.3],[-1.1,-45.5]],[[33.7,-25.2],[33.8,-23.7],[34.2,-23.6],[34.3,-24.4],[34.1,-24.8],[33.8,-24.9],[33.7,-25.2],[33.6,-25.2],[33.3,-24.8],[33.0,-25.1],[33.2,-26.1],[33.6,-26.5]],[[36.6,-17.6],[36.6,-16.0],[36.9,-15.9],[37.1,-16.7],[36.9,-17.2],[36.6,-17.3],[36.6,-17.6],[36.6,-17.6],[36.3,-17.3],[36.1,-17.6],[36.3,-18.6],[36.5,-18.9]],[[26.5,-8.7],[26.4,-7.3],[26.6,-7.2],[26.8,-8.0],[26.7,-8.4],[26.4,-8.5],[26.5,-8.7],[26.6,-8.7],[26.3,-8.2],[26.2,-8.4],[26.4,-9.5],[26.6,-9.9]],[[0.2,-4.8],[0.1,-4.1],[0.2,-3.9],[0.4,-4.5],[0.2,-5.2],[-0.0,-5.4],[0.2,-4.8],[0.3,-4.2],[0.1,-4.0],[-0.1,-4.5],[0.1,-5.2],[0.3,-5.4]],[[-26.5,-8.8],[-26.6,-8.7],[-26.4,-8.4],[-26.3,-8.6],[-26.4,-9.6],[-26.6,-9.9],[-26.5,-8.8],[-26.4,-7.4],[-26.7,-7.3],[-26.8,-8.1],[-26.7,-8.6],[-26.4,-8.7]],[[-36.1,-17.8],[-35.9,-17.8],[-35.7,-17.5],[-35.5,-17.8],[-35.8,-18.8],[-36.0,-19.1],[-36.1,-17.8],[-36.0,-16.4],[-36.3,-16.2],[-36.5,-16.9],[-36.3,-17.4],[-36.0,-17.6]],[[-33.8,-25.2],[-33.6,-25.2],[-33.3,-24.9],[-33.1,-25.1],[-33.3,-26.1],[-33.6,-26.4],[-33.8,-25.2],[-33.9,-23.8],[-34.2,-23.6],[-34.3,-24.4],[-34.2,-24.9],[-33.9,-25.0]]];
+
+// Falas da pegadinha do + (duckFresh evita repetir as últimas 60).
+const DUCK_FAB_PEGA = ['Quer lançar gasto? Vai ter que me pegar.', 'Esse botão tá confiscado.', 'Sem botão, sem gasto. De nada.',
+  'Peguei o +. Hoje ninguém gasta.', 'Esse + é meu agora. Vai somar outra coisa.', 'Botão apreendido pela fiscalização do pato.',
+  'Lançamento só com autorização do pato.', 'Hoje o + tá de folga. Eu dei folga pra ele.', 'Vou levar o + pra passear. Ele precisa de ar.',
+  'Sem +, só −. Pensa nisso.', 'Ninguém aperta esse botão hoje. Ordem do pato.', 'Esse + tava muito usado. Vou guardar.',
+  'Plano de economia: esconder o botão.', 'Você aperta demais esse +. Ele pediu socorro.', 'Guarda o cartão. Eu guardo o +.',
+  'Achou que ia gastar? Achou errado.', 'Esse botão vale mais que teu saldo. Vou proteger.', 'Pega o pato! Pega o pato! ... Não pega não.',
+  'Vou esconder o + onde você esconde a fatura.', 'O + vai comigo. Você fica com o juízo.', 'Bloqueio de gastos ativado. Quack.',
+  'Isso aqui é pelo teu bem. Talvez.', 'Se quiser o botão de volta, me paga um pão.', 'Um botão a menos, um boleto a menos.'];
+const DUCK_FAB_DEVOLVE = ['Tá bom, toma. Mas pensa antes de gastar.', 'Devolvi. Usa com moderação.', 'Pode lançar. Eu tô de olho.',
+  'Toma teu +. Tava pesado mesmo.', 'Devolvido. Mas anotei quantas vezes você apertou.', 'Pronto, tá aí. Se gastar, eu volto.',
+  'Pode usar. Só não abusa, tá?', 'O + voltou. A responsabilidade também.', 'Devolvi porque sou um pato generoso.',
+  'Toma. Agora lança uma receita, pra variar.', 'Tá de volta. Ele sentiu tua falta. Eu não.', 'Usa com carinho. E com pouco.',
+  'Liberado. Mas cada gasto custa uma pena minha.', 'Devolvi. A próxima vez eu levo o saldo junto.', 'Aqui. Era só um teste de paciência.',
+  'O botão tá limpinho. Ao contrário do teu extrato.'];
+
+// Pegadinha do +: pega o botão de lançar no bico (ele encolhe), foge com ele e depois devolve.
+function duckFabPrank() {
+  if ($('#fab').classList.contains('hide')) return false;
+  duckFabRun();
+  return true;
+}
+async function duckFabRun() {
+  const fab = $('#fab'), r = fab.getBoundingClientRect();
+  const home = { cx: r.left + r.width / 2, cy: r.top + r.height / 2 };
+  duckAbort(); duck.busy = true; duck.lastPrank = performance.now();
+  const resetFab = () => {
+    duck.carry = null; fab.classList.remove('carried');
+    fab.style.transition = 'transform .35s'; fab.style.transform = '';
+    setTimeout(() => { fab.style.transition = ''; }, 400);
+  };
+  duck.onAbort = resetFab; // pegaram o pato: o botão volta para o lugar
+  // chega pela esquerda, virado para o botão (bico em cima dele), bica e o botão encolhe até o bico
+  const A = { x: home.cx - BEAK_RUN[2][0][0], y: home.cy - BEAK_RUN[2][0][1] };
+  await duckGo(A, { speed: 45 });
+  duck.dirI = 2;
+  const el = $('#duck');
+  el.style.setProperty('--pk', '4px'); el.classList.add('peck');
+  await duckWait(380);
+  duck.carry = { home, t0: performance.now(), dur: 450 }; fab.classList.add('carried');
+  await duckWait(520);
+  el.classList.remove('peck');
+  duckSay(duckFresh(DUCK_FAB_PEGA));
+  duck.dropFn = () => { duckAbort(); duckAngry(1500); duckSay(duckFresh(DUCK_FAB_SOLTA)); };
+  const b = duckBounds();
+  duck.run = true;
+  await duckGo({ x: -70, y: Math.max(b.minY + 40, duck.y - 160) }, { speed: 135 });
+  await duckWait(2500 + Math.random() * 1500);
+  await duckGo(A, { speed: 125 }); // volta correndo (chega virado para o lugar do botão) e devolve
+  duck.dropFn = null;
+  duck.run = false; duck.dirI = 2;
+  duck.carry = { home, t0: performance.now(), dur: 450, back: true };
+  await duckWait(520);
+  duck.onAbort = null; duck.carry = null; fab.classList.remove('carried'); fab.style.transform = '';
+  duck.busy = false; duck.idleUntil = performance.now() + 1500;
+  duckSay(duckFresh(DUCK_FAB_DEVOLVE));
+}
+// Põe o + no bico: ao pegar ele encolhe do lugar até o bico (ao devolver, o contrário); correndo, acompanha o bico.
+function duckCarryFab(kind, fx) {
+  const c = duck.carry, fab = $('#fab');
+  const off = BEAK_RUN[duck.dirI][kind === 'run' ? fx : 0];
+  let k = Math.min(1, (performance.now() - c.t0) / c.dur);
+  if (c.back) k = 1 - k;
+  k = k * k * (3 - 2 * k);
+  const px = c.home.cx + (duck.x + off[0] - c.home.cx) * k, py = c.home.cy + (duck.y + off[1] - c.home.cy) * k;
+  fab.style.transform = `translate(${px - c.home.cx}px, ${py - c.home.cy}px) scale(${1 - 0.68 * k})`;
+}
+
+// Atravessa a tela como a cobrinha: sai por uma lateral e entra pela outra, na mesma altura.
+const DUCK_OUT = 50; // quanto fora da tela ele fica antes de aparecer do outro lado
+async function duckWrapTo(left, speed) {
+  const b = duckBounds();
+  await duckGo({ x: left ? -DUCK_OUT : b.W + DUCK_OUT, y: duck.y }, { speed });
+  duck.x = left ? duckBounds().W + DUCK_OUT : -DUCK_OUT;
+}
+function duckWrap(left) {
+  const tk = duck.token;
+  duckWrapTo(left, 24).then(() => {
+    if (tk !== duck.token) return;
+    const b = duckBounds();
+    duckGo({ x: left ? b.maxX - 40 - Math.random() * 60 : b.minX + 40 + Math.random() * 60, y: duck.y }, { speed: 24 })
+      .then(() => { duck.idleUntil = performance.now() + 1200 + Math.random() * 3000; });
+  });
+}
+
+// Elemento ainda na tela, entre o topo e a barra de baixo.
+function duckSees(el, b = duckBounds()) {
+  const r = el.getBoundingClientRect();
+  return r.height > 0 && r.top > b.topB + 10 && r.bottom < b.maxY - 10;
+}
+const payRow = (key) => document.querySelector(`.pay[data-key="${CSS.escape(key)}"]`);
+
+// Guarda: conta não paga que vence hoje/amanhã (ou já venceu) → fica do lado batendo o pé até pagar (no máximo 45 s).
+const DUCK_GUARDA = ['{n} {q}, hein. Tô de olho.', 'Ó o {n} aqui: {q}. Paga logo.', 'Não saio daqui até você pagar {n}.',
+  '{n} {q}. Esquecer não é opção.', 'Plantão do pato: {n} {q}.', 'Vou bater o pé até você marcar {n} como paga.',
+  'Psiu! {n} {q}.', '{n} {q}. Multa é pior que pato chato.', 'Fico aqui do lado do {n} até ele ser pago.'];
+function duckGuard() {
+  const b = duckBounds(), tm = tomorrow();
+  const rows = [...document.querySelectorAll('.pay:not(.on)[data-due]')].filter((r) => r.dataset.due && r.dataset.due <= tm && duckSees(r, b));
+  if (!rows.length || Math.random() > 0.5) return false;
+  duckGuardRun(rows[0].dataset.key);
+  return true;
+}
+async function duckGuardRun(key) {
+  duckAbort(); duck.busy = true;
+  const tk = duck.token, el = $('#duck');
+  // fica logo abaixo do valor, olhando para a conta (sem cobrir o texto nem a caixinha)
+  const tgt = () => {
+    const r0 = payRow(key);
+    if (!r0 || r0.classList.contains('on')) return null;
+    const r = r0.getBoundingClientRect(), b = duckBounds();
+    return { x: Math.min(b.maxX, r.right - 24), y: Math.max(b.minY, Math.min(b.maxY, r.bottom + 40)) };
+  };
+  await duckGo(tgt, { speed: 60 });
+  const t0 = performance.now();
+  let n = 0;
+  while (tk === duck.token && performance.now() - t0 < 45000) {
+    const r0 = payRow(key);
+    if (!r0 || r0.classList.contains('on') || ui.tab !== 'sum') break;
+    const p = tgt();
+    if (p && Math.hypot(p.x - duck.x, p.y - duck.y) > 8) { el.classList.remove('tap'); await duckGo(tgt, { speed: 60 }); continue; } // rolou a tela: acompanha
+    duck.dirI = 7;
+    el.classList.add('tap');
+    if (n % 10 === 0) {
+      const due = r0.dataset.due, q = due < today() ? 'já venceu' : due === today() ? 'vence hoje' : 'vence amanhã';
+      const nome = r0.querySelector('.tx b').textContent;
+      duckSay(duckFresh(DUCK_GUARDA.map((x) => x.replace('{n}', nome).replace('{q}', q))));
+    }
+    n++;
+    await duckWait(500);
+  }
+  if (tk !== duck.token) return;
+  el.classList.remove('tap');
+  duck.busy = false; duck.guardCool = performance.now() + 60000; duck.idleUntil = performance.now() + 1500;
+}
+
+// Marcou uma conta como paga: o pato corre até ela e aplaude.
+const DUCK_PAGOU = ['Pagou! Que orgulho.', 'Conta paga. Assim que eu gosto.', 'Uma a menos! Bate aqui. Ah, eu não tenho mão.',
+  'Olha só, adulto responsável!', 'Conta paga, pato feliz.', 'Isso! Agora não tem multa.', 'Riscou! Que sensação boa, né?',
+  'Pagou em dia? Vou até contar pros outros patos.', 'Mais uma paga. Tá ficando bom nisso.'];
+async function duckPaid(key) {
+  const r0 = payRow(key);
+  if (!r0 || !r0.classList.contains('on')) return; // desmarcou: nada
+  if (duckLevel() === 'off' || duck.state !== 'walk' || duck.drag) return;
+  if (Math.random() > { calm: 0.5, zoeiro: 0.85, chato: 1 }[duckLevel()]) return;
+  duckAbort(); duck.busy = true;
+  const tk = duck.token;
+  const tgt = () => {
+    const r1 = payRow(key);
+    if (!r1) return null;
+    const r = r1.getBoundingClientRect(), b = duckBounds();
+    return { x: Math.min(b.maxX, Math.max(b.minX, r.right - 40)), y: Math.max(b.minY, Math.min(b.maxY, r.top + r.height / 2 + 30)) };
+  };
+  await duckGo(tgt, { speed: 95 });
+  if (tk !== duck.token) return;
+  duck.busy = false; duck.idleUntil = performance.now() + 2000;
+  duckSay(duckFresh(DUCK_PAGOU), 'aplaude');
+}
+
+// Maior gasto do mês: vai até a categoria campeã em "Despesas por categoria" e aponta.
+const DUCK_TOPO = ['{n} é o campeão do mês: {v}.', 'Olha o {n} aqui: {p} de tudo que saiu.', '{v} em {n}. Isso é um estilo de vida?',
+  'Se {n} fosse investimento, você tava rico.', 'Maior gasto do mês: {n}. Parabéns? Não.', '{n} levou {p} do teu dinheiro. Bonito, hein.',
+  'Medalha de ouro em gastar: {n}, com {v}.', 'Quer economizar? Começa pelo {n}. Só uma dica.'];
+function duckTopCat() {
+  const r0 = document.querySelector('.cr');
+  if (!r0 || !duckSees(r0)) return false;
+  duckTopCatRun(r0);
+  return true;
+}
+async function duckTopCatRun(r0) {
+  duckAbort(); duck.busy = true; duck.lastPrank = performance.now();
+  const tk = duck.token;
+  const nome = r0.querySelector('.cn').textContent, v = r0.querySelector('.cv').textContent, pc = r0.querySelector('.cp').textContent;
+  const tgt = () => {
+    if (!r0.isConnected) return null;
+    const r = r0.getBoundingClientRect(), b = duckBounds();
+    return { x: Math.min(b.maxX, r.right - 10), y: Math.max(b.minY, Math.min(b.maxY, r.top + r.height / 2 + 26)) };
+  };
+  await duckGo(tgt, { speed: 55 });
+  if (tk !== duck.token) return;
+  duck.dirI = 6;
+  duck.busy = false; duck.idleUntil = performance.now() + 2500;
+  duckSay(duckFresh(DUCK_TOPO.map((x) => x.replace('{n}', nome).replace('{v}', v).replace('{p}', pc))), 'aponta');
+}
+
+// Rolar a tela: o chão anda e o pato vai junto; rolagem muito rápida faz ele tropeçar.
+const DUCK_TOMBO = ['Ei! Devagar que eu caio!', 'Calma! Tá rolando a tela ou fugindo da fatura?', 'Opa! Quase caí.',
+  'Que pressa! Os gastos não vão sumir.', 'Me segura! O chão tá andando!', 'Uou! Freia isso aí.', 'Tô tonto. Foi o extrato ou a rolagem?'];
+let duckSY = window.scrollY, duckST = performance.now();
+window.addEventListener('scroll', () => {
+  const y = window.scrollY, now = performance.now(), dy = y - duckSY, dt = Math.max(16, now - duckST);
+  duckSY = y; duckST = now;
+  if (duckLevel() === 'off' || duck.busy || duck.state !== 'walk' || duck.drag || Math.abs(dy) > 300) return; // pulo grande = troca de aba
+  const b = duckBounds(), cl = (v) => Math.max(b.minY, Math.min(b.maxY, v));
+  duck.y = cl(duck.y - dy);
+  if (duck.goal && duck.goal.pt && typeof duck.goal.pt === 'object') duck.goal.pt = { x: duck.goal.pt.x, y: cl(duck.goal.pt.y - dy) };
+  if (Math.abs(dy) / dt * 1000 > 2500 && now > (duck.tumbleCool || 0)) {
+    duck.tumbleCool = now + 15000;
+    const el = $('#duck');
+    el.classList.remove('tumble'); void el.offsetWidth; el.classList.add('tumble');
+    setTimeout(() => el.classList.remove('tumble'), 800);
+    duckSay(duckFresh(DUCK_TOMBO));
+  }
+}, { passive: true });
+
+// Segurar o dedo parado num lugar vazio da tela: o pato vem até ali.
+const DUCK_DEDO = ['Tô indo, tô indo!', 'Me chamou? Já vou.', 'Aqui? Tá bom.', 'Pato a caminho.', 'Ok, chefe.', 'O que tem aqui? Dinheiro?',
+  'Fui chamado? Cobro por visita, hein.'];
+let duckLP = null;
+const duckLPEnd = () => { if (duckLP) { clearTimeout(duckLP.t); duckLP = null; } };
+document.addEventListener('pointerdown', (e) => {
+  duckLPEnd();
+  if (duckLevel() === 'off' || e.target.closest('#duck, button, input, select, textarea, a, label, .wrap, #tabs, #top, #fab, #mic')) return;
+  const x = e.clientX, y = e.clientY;
+  duckLP = { x, y, t: setTimeout(() => { duckLP = null; duckFollow(x, y); }, 650) };
+});
+document.addEventListener('pointermove', (e) => { if (duckLP && Math.hypot(e.clientX - duckLP.x, e.clientY - duckLP.y) > 10) duckLPEnd(); });
+document.addEventListener('pointerup', duckLPEnd);
+document.addEventListener('pointercancel', duckLPEnd);
+async function duckFollow(x, y) {
+  if (duck.state !== 'walk' || duck.drag || !sheetsClosed()) return;
+  duckAbort(); duck.busy = true;
+  const tk = duck.token, m = $('#dmark'), b = duckBounds();
+  m.style.left = x + 'px'; m.style.top = y + 'px'; m.hidden = false;
+  if (Math.random() < 0.6) duckSay(duckFresh(DUCK_DEDO));
+  await duckGo({ x: Math.max(b.minX, Math.min(b.maxX, x)), y: Math.max(b.minY, Math.min(b.maxY, y)) }, { speed: 85 });
+  if (tk !== duck.token) return;
+  m.hidden = true;
+  duck.busy = false; duck.idleUntil = performance.now() + 3500;
+}
+
+// Último dia do mês com o saldo do mês positivo: traz uma nota de bônus (só de enfeite) e comemora. Uma vez por mês.
+const DUCK_BONUS = ['Mês fechado no azul! Bônus do pato (de mentirinha, tá?).', 'Sobrou dinheiro no mês! Toma uma nota de enfeite.',
+  'Último dia e ainda no positivo! Merece um prêmio. Este é imaginário.', 'Fechou o mês sobrando! Vou comemorar com pão.'];
+function duckBonusDue() {
+  const cur = curMonth();
+  if (ui.month !== cur || today() !== lastDay(cur + '-01')) return false;
+  let f = null;
+  try { f = localStorage.getItem('financas.pato.bonus'); } catch (e) { /* sem acesso: tudo bem */ }
+  if (f === cur) return false;
+  const t = monthTotals(cur);
+  return t.i - t.o - t.inv > 0;
+}
+function duckBonus() {
+  try { localStorage.setItem('financas.pato.bonus', curMonth()); } catch (e) { /* tudo bem */ }
+  const v = contaAte(ui.month);
+  duckBring(v, v, DUCK_BONUS, 'aplaude');
+}
+
+// Passeio: escolhe um ponto perto, anda até lá, para um pouco e escolhe outro.
+function duckWander(now) {
+  const lv = duckLevel();
+  if (ui.tab === 'sum' && duckBonusDue()) { duckBonus(); return; }
+  if (ui.tab === 'sum' && now > (duck.guardCool || 0) && duckGuard()) return; // conta vencendo tem prioridade
+  if (now - duck.lastPrank > 45000 && Math.random() < { calm: 0.05, zoeiro: 0.15, chato: 0.3 }[lv]) {
+    const pr = [duckFabPrank]; if (ui.tab === 'sum') pr.push(duckPrank, duckTopCat);
+    pr.sort(() => Math.random() - 0.5);
+    if (pr.some((f) => f())) return;
+  }
+  const b = duckBounds();
+  const nearL = duck.x < b.minX + 60, nearR = duck.x > b.maxX - 60;
+  if ((nearL || nearR) && Math.random() < 0.45) { duckWrap(nearL); return; }
+  const a = Math.random() * Math.PI * 2, r = 50 + Math.random() * 140;
+  const pt = {
+    x: Math.max(b.minX, Math.min(b.maxX, duck.x + Math.cos(a) * r)),
+    y: Math.max(b.minY, Math.min(b.maxY, duck.y + Math.sin(a) * r)),
+  };
+  duckGo(pt, { speed: 24 }).then(() => { duck.idleUntil = performance.now() + 1200 + Math.random() * 4000; });
+}
+
 function duckTick(t) {
   duck.raf = requestAnimationFrame(duckTick);
   const el = $('#duck');
   const dt = Math.min(0.05, (t - (duck.lastT || t)) / 1000);
   duck.lastT = t;
-  const W = document.documentElement.clientWidth, size = 52;
-  const top = Math.max(120, window.innerHeight - 220); // altura máxima que ele pode subir
+  const now = performance.now(); // mesmo relógio do duckSay
+  const b = duckBounds();
+  if (duck.y < 0) { duck.y = b.maxY - 4; duck.x = 40; }
+  const open = sheetsClosed();
+
   if (duck.state === 'fly') {
-    // jogado: gravidade, quica nas bordas e no chão
-    duck.vy -= 2200 * dt;
+    // jogado: escorrega pela tela (vista de cima), perde velocidade e quica nas bordas
     duck.x += duck.vx * dt; duck.y += duck.vy * dt;
+    const f = Math.exp(-2.6 * dt); duck.vx *= f; duck.vy *= f;
     duck.rot += duck.vx * dt * 0.9;
-    if (duck.x < 0) { duck.x = 0; duck.vx = -duck.vx * 0.6; }
-    if (duck.x > W - size) { duck.x = W - size; duck.vx = -duck.vx * 0.6; }
-    if (duck.y > top) { duck.y = top; duck.vy = -Math.abs(duck.vy) * 0.4; }
-    if (duck.y <= 0) {
-      duck.y = 0;
-      if (duck.vy < -380) { duck.vy = -duck.vy * 0.35; duck.vx *= 0.7; }
-      else { duck.state = 'walk'; duck.vx = duck.vy = 0; duck.rot = 0; duckLanded(); }
+    if (duck.x < -DUCK_OUT) duck.x = b.W + DUCK_OUT; // sai por um lado, entra pelo outro
+    if (duck.x > b.W + DUCK_OUT) duck.x = -DUCK_OUT;
+    if (duck.y < b.topB + 50) { duck.y = b.topB + 50; duck.vy = Math.abs(duck.vy) * 0.6; }
+    if (duck.y > b.maxY) { duck.y = b.maxY; duck.vy = -Math.abs(duck.vy) * 0.6; }
+    if (Math.hypot(duck.vx, duck.vy) < 35) { duck.state = 'walk'; duck.vx = duck.vy = 0; duck.rot = 0; duckLanded(); }
+  }
+
+  // anda até o objetivo (no passeio respeita a pausa da fala; numa cena, não)
+  let moving = false;
+  if (duck.state === 'walk' && open && !duck.goal && !duck.busy && now > duck.idleUntil && now > duck.pauseUntil) duckWander(now);
+  if (duck.state === 'walk' && open && duck.goal && duck.anim !== 'grab' && (duck.busy || now > duck.pauseUntil)) {
+    const g = duck.goal, pt = typeof g.pt === 'function' ? g.pt() : g.pt;
+    if (!pt) duckAbort();
+    else {
+      const dx = pt.x - duck.x, dy = pt.y - duck.y, dist = Math.hypot(dx, dy), step = g.speed * dt;
+      if (dist > 0.5) duck.dirI = dirFrom(dx, dy);
+      if (dist <= step) { duck.x = pt.x; duck.y = pt.y; duck.goal = null; g.res(); }
+      else { duck.x += dx / dist * step; duck.y += dy / dist * step; }
+      duck.dist = (duck.dist || 0) + Math.min(step, dist);
+      moving = true;
     }
   }
-  const walking = duck.state === 'walk' && t > duck.pauseUntil && sheetsClosed();
-  if (walking) {
-    duck.x += duck.dir * duck.speed * dt;
-    if (duck.x > W - size - 6) { duck.x = W - size - 6; duck.dir = -1; }
-    if (duck.x < 6) { duck.x = 6; duck.dir = 1; }
-    if (Math.random() < 0.0015) duck.dir *= -1; // muda de ideia de vez em quando
-  }
-  el.classList.toggle('walk', walking);
-  // quadro do desenho: de frente durante a fala; andando, o passo acompanha a distância (o pé não escorrega)
-  let fx = 0, fy = 0, front = false;
-  const now = performance.now(); // mesmo relógio do duckSay (o t do requestAnimationFrame pode vir atrasado)
-  if (duck.pose && now < duck.pose.until && !duck.drag && duck.state === 'walk') {
-    front = true; fy = duck.pose.row || 0;
+  if (duck.drag) duck.dist = (duck.dist || 0) + 40 * dt; // pernas pedalando no ar
+
+  // quadro do desenho
+  let fx = 0, fy = 0, cw = 92, ch = 92, front = false, kind = duck.run ? 'run' : 'walk';
+  if (duck.pose && now < duck.pose.until && !duck.drag && duck.state === 'walk' && !duck.busy) {
+    front = true; fy = duck.pose.row || 0; cw = 52; ch = 49;
     const e = Math.max(0, now - duck.pose.t0);
     fx = e < 880 ? Math.min(3, Math.floor(e / 220)) : duck.pose.loop ? 2 + Math.floor(e / 300) % 2 : 3;
   } else {
     duck.pose = null;
-    if (walking) duck.dist = (duck.dist || 0) + duck.speed * dt;
-    else if (duck.drag) duck.dist = (duck.dist || 0) + 40 * dt; // pernas pedalando no ar
-    // o ciclo de 32 quadros anda 14,17 px na tela (56,67 px no quadro de 256): 0,443 px por quadro
-    const f = Math.max(0, Math.floor((duck.dist || 0) / 0.443)) % 32;
-    fx = f % 8; fy = Math.floor(f / 8);
+    if (duck.anim === 'grab' && duck.grab) {
+      const e = now - duck.grab.t0;
+      let g = Math.min(14, Math.floor(e / 42));
+      if (duck.grab.reverse) g = 14 - g;
+      fx = g % 8; fy = Math.floor(g / 8); kind = 'grab';
+      if (e > 15 * 42 + 60) {
+        const gr = duck.grab; duck.grab = null; duck.anim = 'walk';
+        if (gr.tk === duck.token) gr.res();
+      }
+    } else if (duck.run) {
+      fx = Math.floor((duck.dist || 0) / D8.runPx) % 12; fy = duck.dirI;
+    } else {
+      fx = moving || duck.drag ? Math.floor((duck.dist || 0) / D8.walkPx) % 16 : 0; fy = duck.dirI;
+    }
   }
   el.classList.toggle('front', front);
-  const cw = front ? 52 : 64, ch = front ? 49 : 64;
+  el.classList.toggle('run', !front && kind === 'run');
+  el.classList.toggle('grab', !front && kind === 'grab');
   $('.dfr').style.backgroundPosition = `${-fx * cw}px ${-fy * ch}px`;
-  el.style.transform = `translate(${duck.x}px, ${-duck.y}px)`;
-  $('#dsprite').style.transform = `scaleX(${front ? 1 : duck.dir}) rotate(${duck.rot}deg)`;
-  // balão sempre dentro da tela
-  const b = $('#dbub'), bw = b.offsetWidth;
-  b.style.left = Math.max(8 - duck.x, Math.min(size / 2 - bw / 2, W - 8 - duck.x - bw)) + 'px';
-  if (duck.state === 'walk' && t > duck.nextTalk && sheetsClosed() && document.visibilityState === 'visible') duckSay();
+  el.style.transform = `translate(${duck.x}px, ${duck.y}px)`;
+  $('#dsprite').style.transform = duck.rot ? `rotate(${duck.rot}deg)` : '';
+  if (duck.carry) duckCarryFab(kind, fx);
+  // balão sempre dentro da tela (embaixo do pato quando ele está lá no alto)
+  const bub = $('#dbub'), bw = bub.offsetWidth;
+  bub.style.left = Math.max(8 - duck.x, Math.min(-bw / 2, b.W - 8 - duck.x - bw)) + 'px';
+  bub.classList.toggle('below', duck.y < b.topB + 150);
+  const onScreen = duck.x > 0 && duck.x < b.W; // escondido do lado de fora não fala sozinho
+  if (duck.state === 'walk' && !duck.busy && onScreen && now > duck.nextTalk && open && document.visibilityState === 'visible') duckSay();
 }
 // Cara brava por alguns segundos.
 function duckAngry(ms = 4000) {
@@ -2487,7 +3182,8 @@ function duckLanded() {
 }
 function duckStart() {
   const el = $('#duck');
-  if (duckLevel() === 'off') { el.hidden = true; cancelAnimationFrame(duck.raf); duck.raf = 0; $('#dbub').classList.remove('show'); return; }
+  if (duckLevel() === 'off') { duckAbort(); el.hidden = true; cancelAnimationFrame(duck.raf); duck.raf = 0; $('#dbub').classList.remove('show'); return; }
+  duck.lastPrank = performance.now() - 20000;
   el.hidden = false;
   scheduleTalk(6000);
   if (!duck.raf) { duck.lastT = 0; duck.raf = requestAnimationFrame(duckTick); }
@@ -2503,8 +3199,8 @@ function duckPoke() {
   } else duckSay();
 }
 $('#duck').addEventListener('pointerdown', (e) => {
-  const el = $('#duck');
-  try { el.setPointerCapture(e.pointerId); } catch (err) { /* segue sem captura */ }
+  if (!e.target.closest('.dhit')) return;
+  try { e.target.setPointerCapture(e.pointerId); } catch (err) { /* segue sem captura */ }
   duck.drag = { id: e.pointerId, cx: e.clientX, cy: e.clientY, x0: duck.x, y0: duck.y, moved: false, samples: [[e.clientX, e.clientY, performance.now()]] };
 });
 $('#duck').addEventListener('pointermove', (e) => {
@@ -2512,15 +3208,15 @@ $('#duck').addEventListener('pointermove', (e) => {
   if (!d || d.id !== e.pointerId) return;
   if (!d.moved && Math.hypot(e.clientX - d.cx, e.clientY - d.cy) > 8) {
     d.moved = true;
-    duck.state = 'drag'; duck.rot = 0;
+    duckAbort(); // largou o que estava fazendo
+    duck.state = 'drag'; duck.rot = 0; duck.dirI = 4;
     $('#duck').classList.add('drag');
     duckSay(duckFresh(['Ei! Me solta!', 'Pra onde você tá me levando?', 'Sequestro de pato! Socorro!', 'Me larga, eu tenho contas pra cobrar!']));
   }
   if (!d.moved) return;
-  const W = document.documentElement.clientWidth;
-  duck.x = Math.max(0, Math.min(W - 52, d.x0 + (e.clientX - d.cx)));
-  duck.y = Math.max(0, d.y0 - (e.clientY - d.cy));
-  if (e.clientX !== d.samples[d.samples.length - 1][0]) duck.dir = e.clientX > d.samples[d.samples.length - 1][0] ? 1 : -1;
+  const b = duckBounds();
+  duck.x = Math.max(10, Math.min(b.W - 10, d.x0 + (e.clientX - d.cx)));
+  duck.y = Math.max(b.topB + 50, Math.min(window.innerHeight - 10, d.y0 + (e.clientY - d.cy)));
   d.samples.push([e.clientX, e.clientY, performance.now()]);
   if (d.samples.length > 6) d.samples.shift();
 });
@@ -2529,11 +3225,11 @@ function duckRelease(e) {
   if (!d || d.id !== e.pointerId) return;
   duck.drag = null;
   $('#duck').classList.remove('drag');
-  if (!d.moved) { duckPoke(); return; }
+  if (!d.moved) { if (duck.dropFn) duck.dropFn(); else duckPoke(); return; }
   // velocidade do arraste (px/s) a partir dos últimos movimentos do dedo
   const a = d.samples[0], z = d.samples[d.samples.length - 1], dtS = Math.max(0.016, (z[2] - a[2]) / 1000);
   duck.vx = (z[0] - a[0]) / dtS;
-  duck.vy = -(z[1] - a[1]) / dtS;
+  duck.vy = (z[1] - a[1]) / dtS;
   duck.throwSpeed = Math.hypot(duck.vx, duck.vy);
   duck.state = 'fly';
 }
@@ -2544,7 +3240,7 @@ $('#duck').addEventListener('pointercancel', duckRelease);
 function applyTheme() {
   const light = S.theme === 'light';
   document.documentElement.dataset.theme = light ? 'light' : 'dark';
-  document.querySelector('meta[name="theme-color"]').content = light ? '#f5f1e8' : '#000000';
+  document.querySelector('meta[name="theme-color"]').content = light ? '#faf8f2' : '#000000';
   document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]').content = light ? 'default' : 'black-translucent';
 }
 

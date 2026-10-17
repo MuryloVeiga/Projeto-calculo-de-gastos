@@ -4,7 +4,7 @@
 // Ao mudar o app, aumente VERSION: 2.2 → 2.3 → 2.4... (também aparece em Ajustes).
 const VERSION = '2.9';
 const CACHE = 'financas-v' + VERSION;
-const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png', './pato-andar.webp', './pato-frente.webp'];
+const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png', './pato-frente.webp', './pato8-andar.webp', './pato8-fugir.webp', './pato8-pegar.webp', './pato8-nota.webp'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
